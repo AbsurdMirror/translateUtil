@@ -8,18 +8,107 @@ from tkinter import scrolledtext
 import pyautogui  
 import threading  
 
-###### 全局变量 ######
-ctrl_c_times = 0
-exit_progress = False
+class TextPositionWindow:
+    window_created = False  
+    window_thread = None  
+    window_root = None  
+    window_text_box = None
 
+    def __init__(self):
+        # 初始化全局变量  
+        self.window_created = False  
+        self.window_thread = None
+        self.window_root = None  
+        self.window_text_box = None  
+
+    def on_window_close(self):  
+        # 退出Tkinter事件循环  
+        self.window_root.quit()  
+
+        # 清理全局变量  
+        self.window_created = False  
+        self.window_thread = None  
+        self.window_root = None  
+        self.window_text_box = None  
+
+    def add_bullets_and_alternate_colors(self, string_list):  
+        self.window_text_box.config(font=("黑体", 15))
+        self.window_text_box.delete('1.0', tk.END)  # 清除文本框内容  
+        for i, string in enumerate(string_list):  
+            # 添加小圆点  
+            bullet_string = "• " + string  
+            
+            # 设置背景色，交替使用两种颜色  
+            if i % 2 == 0:  
+                bg_color = "white"  # 偶数行背景色  
+            else:  
+                bg_color = "#bebebe"  # 奇数行背景色  
+            
+            # 插入带小圆点的字符串，并设置当前行的背景色  
+            self.window_text_box.insert(tk.END, bullet_string + "\n\n", f"line{i}")
+            self.window_text_box.tag_config(f"line{i}", background=bg_color)
+
+    def update_window(self, string_list, x, y):
+        # 更新窗口位置  
+        self.window_root.geometry("+{}+{}".format(x, y))  
+        
+        # 添加文本框内容  
+        self.add_bullets_and_alternate_colors(string_list)
+
+        # 确保窗口在最顶层  
+        self.window_root.attributes('-topmost', True) 
+    
+    def create_window(self, string_list, x, y):  
+        # 创建新的Tkinter窗口  
+        self.window_root = tk.Tk()  
+        self.window_root.title("Mouse Position Window")  
+        self.window_root.geometry("+{}+{}".format(x, y))  # 初始窗口位置  
+        
+        # 创建一个滚动文本框来显示字符串列表  
+        self.window_text_box = scrolledtext.ScrolledText(self.window_root, wrap=tk.WORD)  
+        self.window_text_box.pack(fill="both", expand=True)
+        
+        # 添加内容  
+        self.add_bullets_and_alternate_colors(string_list)
+        
+        # 确保窗口在最顶层  
+        self.window_root.attributes('-topmost', True) 
+        
+        # 绑定窗口关闭事件  
+        self.window_root.protocol("WM_DELETE_WINDOW", self.on_window_close)
+        
+        # 显示窗口并进入事件循环  
+        self.window_root.mainloop()  
+    
+    def create_window_at_mouse_position(self, string_list):        
+        # 获取鼠标位置  
+        x, y = pyautogui.position()  
+        
+        # 如果没有创建窗口或窗口线程已结束，则创建新窗口  
+        if not self.window_created or not self.window_thread or not self.window_thread.is_alive():  
+            self.window_thread = threading.Thread(target=self.create_window, args=(string_list, x - 100, y - 100))  
+            self.window_thread.daemon = True  # 设置为守护线程  
+            self.window_thread.start()  
+            self.window_created = True  # 标记窗口已创建  
+        else:  
+            self.update_window(string_list, x - 100, y - 100)  # 更新已有窗口  
+
+###### 全局变量 ######
+ctrl_c_str = r"'\x03'"
+ctrl_z_str = r"'\x1a'"
+ctrl_x_str = r"'\x18'"
+ctrl_o_str = r"'\x0f'"
+ctrl_c_press_times = 0
+ctrl_z_press_times = 0
+ctrl_x_press_times = 0
+ctrl_o_press_times = 0
+
+exit_progress = False
 hasSetting = False
 setting = {}
 
-# 全局变量，用于跟踪是否已创建窗口  
-window_created = False  
-window_thread = None  
-window_root = None  
-window_text_box = None  
+transTextWindow = TextPositionWindow()
+copyTextWindow = TextPositionWindow()
 
 f = open("CaiYunXiaoYi.token")
 CaiYunXiaoYiToken = f.read()
@@ -57,86 +146,26 @@ def split_string_by_english_sentences(input_string):
     sentences = nltk.sent_tokenize(input_string_no_newline)
 
     return input_string_no_newline, sentences
-  
-def on_window_close():  
-    global window_created, window_thread, window_root, window_text_box  
-    
-    # 退出Tkinter事件循环  
-    window_root.quit()  
-
-    # 清理全局变量  
-    window_created = False  
-    window_thread = None  
-    window_root = None  
-    window_text_box = None  
-
-def update_window(string_list, x, y):  
-    global window_root, window_text_box  
-      
-    # 更新窗口位置  
-    window_root.geometry("+{}+{}".format(x, y))  
-      
-    # 清除文本框内容  
-    window_text_box.delete('1.0', tk.END)  
-
-    # 确保窗口在最顶层  
-    window_root.attributes('-topmost', True) 
-
-    # 添加新的字符串列表内容  
-    for string in string_list:  
-        window_text_box.insert(tk.END, string + "\n\n")  
-  
-def create_window(string_list, x, y):  
-    global window_created, window_thread, window_root, window_text_box  
-      
-    # 创建新的Tkinter窗口  
-    window_root = tk.Tk()  
-    window_root.title("Mouse Position Window")  
-    window_root.geometry("+{}+{}".format(x, y))  # 初始窗口位置  
-      
-    # 创建一个滚动文本框来显示字符串列表  
-    window_text_box = scrolledtext.ScrolledText(window_root, wrap=tk.WORD)  
-    window_text_box.pack(fill="both", expand=True)  
-      
-    # 添加内容  
-    for string in string_list:  
-        window_text_box.insert(tk.END, string + "\n\n")  
-    
-    # 确保窗口在最顶层  
-    window_root.attributes('-topmost', True) 
-    
-    # 绑定窗口关闭事件  
-    window_root.protocol("WM_DELETE_WINDOW", on_window_close)  
-      
-    # 显示窗口并进入事件循环  
-    window_root.mainloop()  
-  
-def create_window_at_mouse_position(string_list):  
-    global window_created, window_thread  
-      
-    # 获取鼠标位置  
-    x, y = pyautogui.position()  
-      
-    # 如果没有创建窗口或窗口线程已结束，则创建新窗口  
-    if not window_created or not window_thread or not window_thread.is_alive():  
-        window_thread = threading.Thread(target=create_window, args=(string_list, x - 100, y - 100))  
-        window_thread.daemon = True  # 设置为守护线程  
-        window_thread.start()  
-        window_created = True  # 标记窗口已创建  
-    else:  
-        update_window(string_list, x - 100, y - 100)  # 更新已有窗口  
 
 def on_press(key):
-    global ctrl_c_times
     global exit_progress
+    global ctrl_c_str, ctrl_c_press_times
+    global ctrl_z_str, ctrl_z_press_times
+    global ctrl_x_str, ctrl_x_press_times
+    global ctrl_o_str, ctrl_o_press_times
 
     # print(key)
-    if str(key) == r"'\x03'":
-        ctrl_c_times = ctrl_c_times + 1
+    if str(key) == ctrl_c_str:
+        ctrl_c_press_times = ctrl_c_press_times + 1
     else:
-        ctrl_c_times = 0
+        ctrl_c_press_times = 0
 
-    if str(key) == r"'\x0f'" or ctrl_c_times == 2:
+    if str(key) == ctrl_x_str:
+        ctrl_x_press_times = ctrl_x_press_times + 1
+    else:
+        ctrl_x_press_times = 0
+
+    if str(key) == ctrl_o_str or ctrl_c_press_times == 2:
         # print("(ctrl + o) || ((ctrl + c) * 2)")
 
         clipboard_content = pyperclip.paste()
@@ -156,7 +185,7 @@ def on_press(key):
         # print(f"Translation source: {tranlate_source_formatted} \n")
         # print(f"Translation target: {tranlate_target_formatted} \n")
 
-        create_window_at_mouse_position(tranlate_target)
+        transTextWindow.create_window_at_mouse_position(tranlate_target)
 
         if hasSetting :
             if setting["save"]["isSave"]:
@@ -172,7 +201,10 @@ def on_press(key):
 
         ctrl_c_times = 0
     
-    if str(key) == r"'\x1a'":
+    if ctrl_x_press_times == 2:
+        copyTextWindow.create_window_at_mouse_position([])
+
+    if str(key) == ctrl_z_str:
         # 结束程序
         print("End program")
         listener.stop()
