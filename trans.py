@@ -7,91 +7,13 @@ import tkinter as tk
 from tkinter import scrolledtext  
 import pyautogui  
 import threading  
-
-class TextPositionWindow:
-    window_created = False  
-    window_thread = None  
-    window_root = None  
-    window_text_box = None
-
-    def __init__(self):
-        # 初始化全局变量  
-        self.window_created = False  
-        self.window_thread = None
-        self.window_root = None  
-        self.window_text_box = None  
-
-    def on_window_close(self):  
-        # 退出Tkinter事件循环  
-        self.window_root.quit()  
-
-        # 清理全局变量  
-        self.window_created = False  
-        self.window_thread = None  
-        self.window_root = None  
-        self.window_text_box = None  
-
-    def add_bullets_and_alternate_colors(self, string_list):  
-        self.window_text_box.config(font=("黑体", 15))
-        self.window_text_box.delete('1.0', tk.END)  # 清除文本框内容  
-        for i, string in enumerate(string_list):  
-            # 添加小圆点  
-            bullet_string = "• " + string  
-            
-            # 设置背景色，交替使用两种颜色  
-            if i % 2 == 0:  
-                bg_color = "white"  # 偶数行背景色  
-            else:  
-                bg_color = "#bebebe"  # 奇数行背景色  
-            
-            # 插入带小圆点的字符串，并设置当前行的背景色  
-            self.window_text_box.insert(tk.END, bullet_string + "\n\n", f"line{i}")
-            self.window_text_box.tag_config(f"line{i}", background=bg_color)
-
-    def update_window(self, string_list, x, y):
-        # 更新窗口位置  
-        self.window_root.geometry("+{}+{}".format(x, y))  
-        
-        # 添加文本框内容  
-        self.add_bullets_and_alternate_colors(string_list)
-
-        # 确保窗口在最顶层  
-        self.window_root.attributes('-topmost', True) 
-    
-    def create_window(self, string_list, x, y):  
-        # 创建新的Tkinter窗口  
-        self.window_root = tk.Tk()  
-        self.window_root.title("Mouse Position Window")  
-        self.window_root.geometry("+{}+{}".format(x, y))  # 初始窗口位置  
-        
-        # 创建一个滚动文本框来显示字符串列表  
-        self.window_text_box = scrolledtext.ScrolledText(self.window_root, wrap=tk.WORD)  
-        self.window_text_box.pack(fill="both", expand=True)
-        
-        # 添加内容  
-        self.add_bullets_and_alternate_colors(string_list)
-        
-        # 确保窗口在最顶层  
-        self.window_root.attributes('-topmost', True) 
-        
-        # 绑定窗口关闭事件  
-        self.window_root.protocol("WM_DELETE_WINDOW", self.on_window_close)
-        
-        # 显示窗口并进入事件循环  
-        self.window_root.mainloop()  
-    
-    def create_window_at_mouse_position(self, string_list):        
-        # 获取鼠标位置  
-        x, y = pyautogui.position()  
-        
-        # 如果没有创建窗口或窗口线程已结束，则创建新窗口  
-        if not self.window_created or not self.window_thread or not self.window_thread.is_alive():  
-            self.window_thread = threading.Thread(target=self.create_window, args=(string_list, x - 100, y - 100))  
-            self.window_thread.daemon = True  # 设置为守护线程  
-            self.window_thread.start()  
-            self.window_created = True  # 标记窗口已创建  
-        else:  
-            self.update_window(string_list, x - 100, y - 100)  # 更新已有窗口  
+import nltk
+from nltk.tokenize import word_tokenize, sent_tokenize  
+from nltk.tag import pos_tag  
+from nltk.stem import WordNetLemmatizer  
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('wordnet')
 
 ###### 全局变量 ######
 ctrl_c_str = r"'\x03'"
@@ -107,14 +29,15 @@ exit_progress = False
 hasSetting = False
 setting = {}
 
-transTextWindow = TextPositionWindow()
-copyTextWindow = TextPositionWindow()
+transTextWindow = None
+copyTextWindow = None
 
 f = open("CaiYunXiaoYi.token")
 CaiYunXiaoYiToken = f.read()
 
 ######################
 
+###### 翻译功能 ######
 def tranlateCaiYunXiaoYi(source, direction):
     url = "http://api.interpreter.caiyunai.com/v1/translator"
 
@@ -142,10 +65,62 @@ def split_string_by_english_sentences(input_string):
     input_string_no_newline = input_string.replace('\r', ' ')
     input_string_no_newline = input_string_no_newline.replace('\n', ' ')
 
-    import nltk
     sentences = nltk.sent_tokenize(input_string_no_newline)
 
     return input_string_no_newline, sentences
+
+def tranlateMain(source_content):
+    no_newline_content, tranlate_source = split_string_by_english_sentences(source_content)
+    # tranlate_target = []
+    tranlate_target = tranlateCaiYunXiaoYi(tranlate_source, "auto2zh")
+    tranlate_source_formatted = json.dumps(tranlate_source, indent=4, ensure_ascii=False)
+    tranlate_target_formatted = json.dumps(tranlate_target, indent=4, ensure_ascii=False)  
+
+    os.system('cls')
+    print(f"剪切板内容: {source_content} \n")
+    print(f"去除换行: {no_newline_content} \n")
+    print(f"句子拆分: {tranlate_source_formatted} \n")
+    print(f"翻译结果: {tranlate_target_formatted} \n")
+    # print(f"Clipboard content: {source_content} \n")
+    # print(f"No newline content: {no_newline_content} \n")
+    # print(f"Translation source: {tranlate_source_formatted} \n")
+    # print(f"Translation target: {tranlate_target_formatted} \n")
+
+    tranlate_source_target = []
+    i = 0
+    for item in tranlate_source:
+        tranlate_source_target.append(item + "\n" + tranlate_target[i])
+        i = i + 1
+
+    tranlate_show = []
+    if hasSetting:
+        if setting["show"]["showSource"]:
+            tranlate_show = tranlate_source_target
+        else:
+            tranlate_show = tranlate_target
+
+    transTextWindow.create_window_at_mouse_position(tranlate_show)
+
+    if hasSetting :
+        if setting["save"]["isSave"]:
+            fileDirpath = os.path.join("./save", setting["save"]["savePath"])
+            if not os.path.exists(fileDirpath):  
+                os.makedirs(fileDirpath)
+            filePath = os.path.join(fileDirpath, setting["save"]["saveName"])
+
+            tranlate_save = []
+            if setting["save"]["saveSource"]:
+                tranlate_save = tranlate_source_target
+            else:
+                tranlate_save = tranlate_target
+
+            with open(filePath, "a", encoding="utf-8") as savefile:
+                for item in tranlate_save:
+                    # 将每一项写入文件，并在每一项后添加一个换行符  
+                    savefile.write(item + '\n')
+                    if setting["save"]["saveSource"]:
+                        savefile.write('\n')
+                savefile.write("\n\n---\n---\n\n")
 
 def on_press(key):
     global exit_progress
@@ -167,39 +142,9 @@ def on_press(key):
 
     if str(key) == ctrl_o_str or ctrl_c_press_times == 2:
         # print("(ctrl + o) || ((ctrl + c) * 2)")
-
         clipboard_content = pyperclip.paste()
-        no_newline_content, tranlate_source = split_string_by_english_sentences(clipboard_content)
-        # tranlate_target = []
-        tranlate_target = tranlateCaiYunXiaoYi(tranlate_source, "auto2zh")
-        tranlate_source_formatted = json.dumps(tranlate_source, indent=4, ensure_ascii=False)
-        tranlate_target_formatted = json.dumps(tranlate_target, indent=4, ensure_ascii=False)  
-
-        os.system('cls')
-        print(f"剪切板内容: {clipboard_content} \n")
-        print(f"去除换行: {no_newline_content} \n")
-        print(f"句子拆分: {tranlate_source_formatted} \n")
-        print(f"翻译结果: {tranlate_target_formatted} \n")
-        # print(f"Clipboard content: {clipboard_content} \n")
-        # print(f"No newline content: {no_newline_content} \n")
-        # print(f"Translation source: {tranlate_source_formatted} \n")
-        # print(f"Translation target: {tranlate_target_formatted} \n")
-
-        transTextWindow.create_window_at_mouse_position(tranlate_target)
-
-        if hasSetting :
-            if setting["save"]["isSave"]:
-                fileDirpath = os.path.join("./save", setting["save"]["savePath"])
-                if not os.path.exists(fileDirpath):  
-                    os.makedirs(fileDirpath)
-                filePath = os.path.join(fileDirpath, setting["save"]["saveName"])
-                with open(filePath, "a", encoding="utf-8") as savefile:
-                    for item in tranlate_target:
-                        # 将每一项写入文件，并在每一项后添加一个换行符  
-                        savefile.write(item + '\n')
-                    savefile.write("---\n")
-
-        ctrl_c_times = 0
+        tranlateMain(clipboard_content)
+        ctrl_c_press_times = 0
     
     if ctrl_x_press_times == 2:
         copyTextWindow.create_window_at_mouse_position([])
@@ -214,11 +159,265 @@ def on_release(key):
     global ctrl_pressed  
     if key == Key.ctrl:  
         ctrl_pressed = 0  
+######################
+
+###### UI界面 ######
+class TextPositionWindow:
+    window_created = False  
+    window_thread = None  
+    window_root = None  
+    window_text_box = None
+    window_side_text = None
+
+    def __init__(self):
+        # 初始化全局变量  
+        self.window_created = False  
+        self.window_thread = None
+        self.window_root = None  
+        self.window_text_box = None  
+        self.window_side_text = None
+
+    def on_window_close(self):  
+        # 退出Tkinter事件循环  
+        self.window_root.quit()  
+
+        # 清理全局变量  
+        self.window_created = False  
+        self.window_thread = None  
+        self.window_root = None  
+        self.window_text_box = None  
+        self.window_side_text = None
+
+    def add_bullets_and_alternate_colors(self, string_list):  
+        self.window_text_box.config(font=("微软雅黑", 13))
+        self.window_text_box.delete('1.0', tk.END)  # 清除文本框内容  
+        
+        self.window_side_text.config(font=("微软雅黑", 12))
+        self.window_side_text.delete('1.0', tk.END)  # 清除文本框内容  
+        
+        for i, string in enumerate(string_list):  
+            # 添加小圆点  
+            bullet_string = "• " + string  
+            
+            # 设置背景色，交替使用两种颜色  
+            if i % 2 == 0:  
+                bg_color = "#F0F0F0"  # 偶数行背景色  
+            else:  
+                bg_color = "#E0EAF1"  # 奇数行背景色  
+            
+            # 插入带小圆点的字符串，并设置当前行的背景色  
+            self.window_text_box.insert(tk.END, bullet_string + "\n\n", f"line{i}")
+            self.window_text_box.tag_config(f"line{i}", background=bg_color, foreground="#333333", selectbackground="pink")
+
+    def on_right_click(self,event):  
+        # 获取self.window_text_box选中内容的单词  
+        word_start = self.window_text_box.index("sel.first")
+        word_end = self.window_text_box.index("sel.last")
+
+        before_string = self.window_text_box.get('1.0', word_start)
+        sentence_start_index = before_string.rfind('\n')
+        if sentence_start_index == -1:
+            sentence_start_index = 0
+        sentence_before = before_string[sentence_start_index:]
+
+        after_string = self.window_text_box.get(word_end, tk.END)
+        sentence_end_index = after_string.find('\n')
+        if sentence_end_index == -1:
+            sentence_end_index = len(after_string)
+        sentence_after = after_string[:sentence_end_index]
+
+        selected_word = self.window_text_box.get(word_start, word_end)
+        sentence = sentence_before + selected_word + sentence_after
+        print(sentence)
+
+        if selected_word:  # 如果找到了单词  
+            self.window_side_text.config(font=("微软雅黑", 12))
+            self.window_side_text.delete('1.0', tk.END)  # 清除文本框内容  
+            self.window_side_text.insert(tk.END, "获取中……")
+            self.window_side_text.update()
+  
+            # 查找选中单词的词性  
+            tagged_words = pos_tag(word_tokenize(sentence))  
+            for word, pos in tagged_words:  
+                if word.lower() == selected_word.lower():  
+                    word_pos = pos  
+                    break  
+            else:  
+                word_pos = None  
+                      
+            # 词形还原  
+            lemmatizer = WordNetLemmatizer()  
+            if not word_pos:
+                reduced_word = selected_word  # 无法确定词性时，保持原样  
+            elif word_pos.startswith('J'):  # 形容词  
+                reduced_word = lemmatizer.lemmatize(selected_word, pos='a')  
+            elif word_pos.startswith('V'):  # 动词  
+                reduced_word = lemmatizer.lemmatize(selected_word, pos='v')  
+            elif word_pos.startswith('N'):  # 名词  
+                reduced_word = lemmatizer.lemmatize(selected_word, pos='n')  
+            elif word_pos.startswith('R'):  # 副词  
+                reduced_word = lemmatizer.lemmatize(selected_word, pos='r')  
+            else:  
+                reduced_word = selected_word  # 无法确定词性时，保持原样  
 
 
-############################################################################################################
+            # 发送GET请求  
+            url = "https://cdn.jsdelivr.net/gh/lyc8503/baicizhan-word-meaning-API/data/words/" + reduced_word + ".json"
+            response = requests.get(url)  
+            # print(tagged_words, selected_word, reduced_word)
+            # print(url, response.text)
+  
+            # 检查请求是否成功  
+            if response.status_code == 200:  
+                # 解析响应的JSON文本得到一个对象  
+                data = json.loads(response.text)  
+                self.window_side_text.delete('1.0', tk.END)  # 清除文本框内容  
+                self.window_side_text.insert(
+                    tk.END, 
+                    "选中: " + selected_word + "\n\n" + 
+                    "词性: " + word_pos + "\n\n" + 
+                    "原型: " + data["word"] + "\n\n" + 
+                    "音标: " + data["accent"] + "\n\n" + 
+                    "翻译: " + data["mean_cn"]
+                )  
+            else:  
+                self.window_side_text.delete('1.0', tk.END)  # 清除文本框内容  
+                self.window_side_text.insert(tk.END, f"请求失败，状态码：{response.status_code}")  
 
-############################################
+    def update_window(self, string_list, x, y):
+        # 更新窗口位置  
+        self.window_root.geometry("+{}+{}".format(x, y))  
+        
+        # 添加文本框内容  
+        self.add_bullets_and_alternate_colors(string_list)
+
+        # 确保窗口在最顶层  
+        self.window_root.attributes('-topmost', True) 
+    
+    def create_window(self, string_list, x, y):  
+        # 创建新的Tkinter窗口  
+        self.window_root = tk.Tk()  
+        self.window_root.title("Mouse Position Window")  
+        self.window_root.geometry("+{}+{}".format(x, y))  # 初始窗口位置  
+        
+        # 创建一个滚动文本框来显示字符串列表  
+        self.window_text_box = scrolledtext.ScrolledText(self.window_root, wrap=tk.WORD)  
+        self.window_text_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)  # 填充并扩展至左侧 
+
+        # 绑定双击事件  
+        self.window_text_box.tag_bind("sel", "<Button-3>", self.on_right_click)  
+        
+        # 创建小侧边滚动文本框  
+        self.window_side_text = scrolledtext.ScrolledText(self.window_root, wrap=tk.WORD, width=15)
+        self.window_side_text.pack(side=tk.RIGHT, fill=tk.Y)  # 仅垂直填充右侧 
+
+        # 确保两个文本框之间有间隔  
+        self.window_root.rowconfigure(0, weight=1)  # 设置行权重，使得左侧文本框可以扩展  
+        self.window_root.columnconfigure(0, weight=1)  # 设置列权重，使得左侧文本框可以水平扩展  
+        self.window_root.columnconfigure(1, weight=0)  # 设置小文本框所在列的权重为0，不扩展  
+
+        # 添加内容  
+        self.add_bullets_and_alternate_colors(string_list)
+        
+        # 确保窗口在最顶层  
+        self.window_root.attributes('-topmost', True) 
+        
+        # 绑定窗口关闭事件  
+        self.window_root.protocol("WM_DELETE_WINDOW", self.on_window_close)
+        
+        # 显示窗口并进入事件循环  
+        self.window_root.mainloop()  
+    
+    def create_window_at_mouse_position(self, string_list):        
+        # 获取鼠标位置  
+        x, y = pyautogui.position()  
+        
+        # 如果没有创建窗口或窗口线程已结束，则创建新窗口  
+        if not self.window_created or not self.window_thread or not self.window_thread.is_alive():  
+            self.window_thread = threading.Thread(target=self.create_window, args=(string_list, x - 100, y - 100))  
+            self.window_thread.daemon = True  # 设置为守护线程  
+            self.window_thread.start()  
+            self.window_created = True  # 标记窗口已创建  
+        else:  
+            self.update_window(string_list, x - 100, y - 100)  # 更新已有窗口  
+
+class CopyTextPositionWindow:
+    window_created = False  
+    window_thread = None  
+    window_root = None  
+    window_text_box = None
+
+    def __init__(self):
+        # 初始化全局变量  
+        self.window_created = False  
+        self.window_thread = None
+        self.window_root = None  
+        self.window_text_box = None  
+
+    def on_window_close(self):  
+        # 退出Tkinter事件循环  
+        self.window_root.quit()  
+
+        # 清理全局变量  
+        self.window_created = False  
+        self.window_thread = None  
+        self.window_root = None  
+        self.window_text_box = None  
+
+    def copy_translate_text(self):  
+        # 获取文本框中的内容  
+        text = self.window_text_box.get("1.0", tk.END)  
+        # 将内容复制到剪贴板  
+        tranlateMain(text)
+
+    def update_window(self, string_list, x, y):
+        # 更新窗口位置  
+        self.window_root.geometry("+{}+{}".format(x, y))  
+
+        # 确保窗口在最顶层  
+        self.window_root.attributes('-topmost', True) 
+    
+    def create_window(self, string_list, x, y):  
+        # 创建新的Tkinter窗口  
+        self.window_root = tk.Tk()  
+        self.window_root.title("Mouse Position Window")  
+        self.window_root.geometry("+{}+{}".format(x, y))  # 初始窗口位置  
+        
+        # 创建一个滚动文本框来显示字符串列表  
+        self.window_text_box = scrolledtext.ScrolledText(self.window_root, wrap=tk.WORD)  
+        self.window_text_box.pack(fill="both", expand=True)
+        
+        # 创建按钮，并绑定copy_text函数到按钮的点击事件  
+        copy_button = tk.Button(self.window_root, text="复制文本", command=self.copy_translate_text)  
+        copy_button.pack(side=tk.RIGHT, anchor=tk.N)  # 将按钮放置在窗口右上角 
+        
+        # 确保窗口在最顶层  
+        self.window_root.attributes('-topmost', True) 
+        
+        # 绑定窗口关闭事件  
+        self.window_root.protocol("WM_DELETE_WINDOW", self.on_window_close)
+        
+        # 显示窗口并进入事件循环  
+        self.window_root.mainloop()  
+    
+    def create_window_at_mouse_position(self, string_list):        
+        # 获取鼠标位置  
+        x, y = pyautogui.position()  
+        
+        # 如果没有创建窗口或窗口线程已结束，则创建新窗口  
+        if not self.window_created or not self.window_thread or not self.window_thread.is_alive():  
+            self.window_thread = threading.Thread(target=self.create_window, args=(string_list, x - 100, y - 100))  
+            self.window_thread.daemon = True  # 设置为守护线程  
+            self.window_thread.start()  
+            self.window_created = True  # 标记窗口已创建  
+        else:  
+            self.update_window(string_list, x - 100, y - 100)  # 更新已有窗口  
+
+transTextWindow = TextPositionWindow()
+copyTextWindow = CopyTextPositionWindow()
+######################
+
+###### 读取配置 ######
 # 设置文件名  
 filename = 'setting.json'  
 
@@ -231,7 +430,7 @@ if os.path.exists(filename):
         hasSetting = True
 else:  
     print(f"文件 {filename} 不存在")
-############################################
+######################
 
 # 使用with语句来确保Listener正确关闭  
 with Listener(on_press=on_press, on_release=on_release) as listener:  
