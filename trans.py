@@ -7,6 +7,9 @@ import tkinter as tk
 from tkinter import scrolledtext  
 import pyautogui  
 import threading  
+from bs4 import BeautifulSoup  
+import webbrowser 
+import re
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize  
 from nltk.tag import pos_tag  
@@ -168,6 +171,9 @@ class TextPositionWindow:
     window_root = None  
     window_text_box = None
     window_side_text = None
+    paned_window = None
+    right_frame = None
+    detail_web_url = "https://dict.cn/"
 
     def __init__(self):
         # 初始化全局变量  
@@ -260,29 +266,33 @@ class TextPositionWindow:
             else:  
                 reduced_word = selected_word  # 无法确定词性时，保持原样  
 
-
-            # 发送GET请求  
-            url = "https://cdn.jsdelivr.net/gh/lyc8503/baicizhan-word-meaning-API/data/words/" + reduced_word + ".json"
+            # 发送GET请求
+            url = "https://apii.dict.cn/mini.php?q=" + reduced_word
             response = requests.get(url)  
+            self.detail_web_url = url
+            self.window_side_text.delete('1.0', tk.END)  # 清除文本框内容  
+
             # print(tagged_words, selected_word, reduced_word)
             # print(url, response.text)
   
             # 检查请求是否成功  
             if response.status_code == 200:  
-                # 解析响应的JSON文本得到一个对象  
-                data = json.loads(response.text)  
-                self.window_side_text.delete('1.0', tk.END)  # 清除文本框内容  
-                self.window_side_text.insert(
-                    tk.END, 
-                    "选中: " + selected_word + "\n\n" + 
-                    "词性: " + word_pos + "\n\n" + 
-                    "原型: " + data["word"] + "\n\n" + 
-                    "音标: " + data["accent"] + "\n\n" + 
-                    "翻译: " + data["mean_cn"]
-                )  
+                soup = BeautifulSoup(response.text, 'lxml')  
+                trans_text = soup.text
+                trans_text = trans_text.replace("\n", " ")  
+                trans_text = trans_text.replace("[", "\n[")  
+                trans_text = trans_text.replace("]", "]\n")  
+                trans_text = trans_text.replace("Define ", "\nDefine \n\n")  
+                trans_text = trans_text.replace("例句与用法", "\n\n例句与用法")  
+                pattern = r'(\d+)(\.|\s)'  # \d+ 匹配一个或多个数字，\. 匹配点号  
+                replacement = r'\n\g<1>\g<2>'  # \g<1> 引用第一个括号中匹配的内容  
+                trans_text = re.sub(pattern, replacement, trans_text)  
+                self.window_side_text.insert(tk.END, trans_text)  
             else:  
-                self.window_side_text.delete('1.0', tk.END)  # 清除文本框内容  
                 self.window_side_text.insert(tk.END, f"请求失败，状态码：{response.status_code}")  
+
+    def open_web(self):
+        webbrowser.open(self.detail_web_url)
 
     def update_window(self, string_list, x, y):
         # 更新窗口位置  
@@ -299,22 +309,35 @@ class TextPositionWindow:
         self.window_root = tk.Tk()  
         self.window_root.title("Mouse Position Window")  
         self.window_root.geometry("+{}+{}".format(x, y))  # 初始窗口位置  
-        
+
+        # 使用Panedwindow来分割左右两个区域  
+        self.paned_window = tk.PanedWindow(self.window_root, orient=tk.HORIZONTAL)  
+        self.paned_window.pack(fill=tk.BOTH, expand=True)  
+
         # 创建一个滚动文本框来显示字符串列表  
         self.window_text_box = scrolledtext.ScrolledText(self.window_root, wrap=tk.WORD)  
         self.window_text_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)  # 填充并扩展至左侧 
 
+        # 将滚动文本框添加到panedwindow的左侧  
+        self.paned_window.add(self.window_text_box)  
+
         # 绑定双击事件  
         self.window_text_box.tag_bind("sel", "<Button-3>", self.on_right_click)  
         
-        # 创建小侧边滚动文本框  
-        self.window_side_text = scrolledtext.ScrolledText(self.window_root, wrap=tk.WORD, width=15)
-        self.window_side_text.pack(side=tk.RIGHT, fill=tk.Y)  # 仅垂直填充右侧 
+        # 右侧的框架，包含小文本框和按钮  
+        self.right_frame = tk.Frame(self.paned_window)  
+        self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)  
 
-        # 确保两个文本框之间有间隔  
-        self.window_root.rowconfigure(0, weight=1)  # 设置行权重，使得左侧文本框可以扩展  
-        self.window_root.columnconfigure(0, weight=1)  # 设置列权重，使得左侧文本框可以水平扩展  
-        self.window_root.columnconfigure(1, weight=0)  # 设置小文本框所在列的权重为0，不扩展  
+        # 创建小侧边滚动文本框  
+        self.window_side_text = scrolledtext.ScrolledText(self.right_frame, height=5, width=30)
+        self.window_side_text.pack(side=tk.TOP, fill=tk.BOTH, expand=True, pady=5)  # 仅垂直填充右侧 
+
+        # 创建按钮，并绑定open_web函数到按钮的点击事件  
+        web_button = tk.Button(self.right_frame, text="详细翻译", command=self.open_web)  
+        web_button.pack(side=tk.BOTTOM, fill=tk.X, pady=5)  # 将按钮放置在窗口右上角 
+
+        # 将右侧框架添加到panedwindow的右侧  
+        self.paned_window.add(self.right_frame)  
 
         # 添加内容  
         self.add_bullets_and_alternate_colors(string_list)
@@ -388,7 +411,7 @@ class CopyTextPositionWindow:
         self.window_text_box.pack(fill="both", expand=True)
         
         # 创建按钮，并绑定copy_text函数到按钮的点击事件  
-        copy_button = tk.Button(self.window_root, text="复制文本", command=self.copy_translate_text)  
+        copy_button = tk.Button(self.window_root, text="翻译文本", command=self.copy_translate_text)  
         copy_button.pack(side=tk.RIGHT, anchor=tk.N)  # 将按钮放置在窗口右上角 
         
         # 确保窗口在最顶层  
