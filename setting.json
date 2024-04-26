@@ -1,7 +1,11 @@
 {
     "save": {
         "isSave": true,
-        "savePath": "test",
-        "saveName": "test"
+        "savePath": "books",
+        "saveName": "gaudi3.txt",
+        "saveSource": true
+    },
+    "show": {
+        "showSource": true
     }
 }
