@@ -1,0 +1,703 @@
+
+===Part D Appendices
+---D 部附录
+===
+===Appendix A Transaction Naming This appendix defines the naming scheme that this specification recommends for full cache line and partial cache line write transactions.
+---附录 A 事务命名这个附录定义了本规范推荐的用于完整缓存行和部分缓存行写事务的命名方案。
+===
+===It contains the following section: • Full and partial cache line write transaction naming on pageAppxA-318.
+---它包含以下部分: •在 pageAppxA-318上写入事务命名的全部和部分缓存行。
+===
+===ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+===
+===All rights reserved.
+---保留所有权利
+===
+===AppxA-317 ID033013 Non-Confidential
+---附件 A-317 ID033013非保密资料
+===
+===AppendixA Transaction Naming A.1 Full and partial cache line write transaction naming A.1 Full and partial cache line write transaction naming A more consistent naming terminology for write transactions is introduced, to differentiate between full cache line and partial cache line transactions: • any transaction that is a full cache line write with all byte strobes asserted is identified by the name suffix Full • any transaction that is a partial cache line write that is not guaranteed to have all byte strobes asserted is identified by the name suffix Ptl.
+---附录 A 事务命名 A.1完全和部分缓存行写事务命名 A.1完全和部分缓存行写事务命名为了区分完全缓存行和部分缓存行事务，引入了一个更加一致的命名术语: •任何具有完全缓存行的事务，如果断言了所有字节闪存，则使用名称后缀 Full 来标识•任何不能保证断言了所有字节闪存的部分缓存行写事务，则使用名称后缀 Ptl 来标识。
+===
+===It is permitted for a transaction that is indicated as being a partial cache line write to be a full cache line write.
+---允许指示为部分缓存行写的事务为完整缓存行写。
+===
+===The name without a suffix, or using a * suffix, is used in any description that covers both the full and partial line variant of the transaction.
+---不带后缀的名称或使用 * 后缀的名称可用于任何包含事务的完整行变体和部分行变体的描述中。
+===
+===TableA-1 shows the augmented naming.
+---表 A-1显示了增强的命名。
+===
+===TableA-1 Augmented naming for write transactions Generic name Full cache line variant Partial cache line variant Notes WriteUnique WriteUniqueFull WriteUniquePtl - WriteBack WriteBackFull WriteBackPtl - WriteClean WriteCleanFull WriteCleanPtl - WriteEvict WriteEvictFull - There is no partial line variant for WriteEvict Adoption of the new naming scheme is optional and context always permits the naming scheme in use to be determined.
+---表 A-1写事务的扩展命名通用名称完整缓存行变量部分缓存行变量 Notes WriteUnique WriteUniqueFull WriteUniquePtl-WriteBack WriteBackFull WriteBackPtl-WriteClean WriteCleanFull WriteCleanPtl-WriteEvict WriteEvictFull 没有部分行变量 WriteEvict 采用新的命名方案是可选的，上下文总是允许确定正在使用的命名方案。
+===
+===Note Ace does not provide an address phase indication that a WriteBack or WriteClean transaction is a full or partial line write.
+---注意: Ace 没有提供地址阶段指示，表明 WriteBack 或 WriteClean 事务是完整或部分行写。
+===
+===AppxA-318 Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---AppxA-318 Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+===
+===All rights reserved.
+---保留所有权利
+===
+===ARM IHI 0022E Non-Confidential ID033013
+---ARM IHI 0022E 非机密 ID033013
+===
+===Appendix B Accelerator Coherency Port Interface Restrictions This appendix defines a subset of the ACE-Lite protocol.
+---附录 B 加速器一致性端口接口限制这个附录定义了 ACE-Lite 协议的一个子集。
+===
+===A number of ARM processors that have an Accelerator Coherency Port (ACP) use this subset.
+---许多具有加速器一致性端口(ACP)的 ARM 处理器使用这个子集。
+===
+===The ACP provides a port for local hardware accelerator components that benefit from an interface optimized for coherent cache line accesses.
+---ACP 为本地硬件加速器组件提供了一个端口，这些组件受益于为相干缓存线路访问而优化的接口。
+===
+===ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+===
+===All rights reserved.
+---保留所有权利
+===
+===AppxB-319 ID033013 Non-Confidential
+---附件 B-319 ID033013非保密资料
+===
+===AppendixB Accelerator Coherency Port Interface Restrictions B.1 ACP interface requirements B.1 ACP interface requirements The requirements of the ACP interface are: • Read data bus width and write data bus width must be 128-bit.
+---附录 B 加速器一致性端口接口限制 B.1 ACP 接口要求 B.1 ACP 接口要求 ACP 接口的要求是: •读数据总线宽度和写数据总线宽度必须是128位。
+===
+===• All transactions have burst size equal to the data bus width, AxSIZE = 0b100.
+---•所有事务的突发大小等于数据总线宽度，AxSIZE = 0b100。
+===
+===• All transaction burst addresses must be aligned to the burst length.
+---•所有交易突发地址必须与突发长度一致。
+===
+===• All transactions have burst type INCR, AxBURST = 0b01.
+---•所有交易都有突发类型 INCR，AxBURST = 0b01。
+===
+===• Two burst lengths are supported, 16-bytes and 64-bytes: — 16-byte burst, AxLEN = 0x00 and AxADDR[3:0] = 0x0.
+---•支持两个脉冲长度，16字节和64字节: ー16字节脉冲，AxLEN = 0x00和 AxADDR [3:0] = 0x0。
+===
+===— 64-byte burst, AxLEN = 0x03 and AxADDR[5:0] = 0b000000.
+---ー64字节突发，AxLEN = 0x03和 AxADDR [5:0] = 0b000000。
+===
+===• For write bursts: — 16-byte write bursts are permitted to have any combination of valid bytes.
+---对于写入突发: ー16字节的写入突发允许有任何有效字节组合。
+===
+===— 64-byte write bursts must have all bytes valid.
+---ー64字节的写入突发必须所有字节都有效。
+===
+===• Exclusive transactions are not supported AxLOCK = 0b0.
+---•不支持 AxLOCK = 0b0独占事务。
+===
+===• All transactions are memory type Write-back with any allocation hint, AxCACHE[3:2] = 0b11.
+---•所有事务都是内存类型 Write-back，带有任何分配提示，AxCACHE [3:2] = 0b11。
+===
+===• All transactions are permitted to be secure or Non-secure, AxPROT[2:0] can take any value.
+---•所有交易都允许是安全的或不安全的，AxPROT [2:0]可以取任何值。
+===
+===• QoS is not supported, AxQOS = 0b0000.
+---•不支持 QoS，AxQOS = 0b0000。
+===
+===• Multiple address region signaling is not supported, AxREGION = 0b0000.
+---•不支持多地址区域信令，AxRegiION = 0b0000。
+===
+===• Cache maintenance transactions are not supported, ARSNOOP = 0b0000, AWSNOOP = 0b000.
+---不支持缓存维护事务，ARSNOOP = 0b0000，AWSNOOP = 0b000。
+===
+===• Barrier transactions are not supported, AxBAR = 0b00.
+---•不支持障碍事务，AxBAR = 0b00。
+===
+===• A transaction must be Non-shareable, Inner Shareable or Outer Shareable, AxDOMAIN can be any value except 0b11.
+---•交易必须是非共享的、内部可共享的或外部可共享的，AxDOMAIN 可以是除0b11以外的任何值。
+===
+===• A transaction ID width of up to 5-bits is supported.
+---•支持最多5位的交易 ID 宽度。
+===
+===• Write interleaving is not supported.
+---•不支持写交织。
+===
+===A signal that is required to be at a fixed value does not have to be included in the interface.
+---要求处于固定值的信号不必包含在接口中。
+===
+===The signals that are required to be at a fixed value are: • AxSIZE • AxBURST • AxLOCK • AxQOS • AxREGION • AxSNOOP • AxBAR.
+---需要处于固定值的信号是: • AxSIZE • AxBURST • AxLOCK • AxQOS • AxregION • AxSNOOP • AxBAR。
+===
+===If any of these signals are present on the slave interface, they must be tied to the required values defined in this appendix.
+---如果这些信号中的任何一个出现在从接口上，它们必须与附录中定义的所需值绑定在一起。
+===
+===Note Some implementations use the AxUSER[1:0] signals to provide the AxDOMAIN signal information, see the component documentation for further details as this is IMPLEMENTATION DEFINED.
+---注意: 有些实现使用 AxUSER [1:0]信号来提供 AxDOMAIN 信号信息，有关详细信息，请参阅组件文档，因为这是 IMPLEMENTATION DEFINED。
+===
+===AppxB-320 Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---AppxB-320 Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+===
+===All rights reserved.
+---保留所有权利
+===
+===ARM IHI 0022E Non-Confidential ID033013
+---ARM IHI 0022E 非机密 ID033013
+===
+===Appendix C Revisions This appendix describes the technical changes between released issues of this specification.
+---附录 C 修订本附录描述了本规范发布问题之间的技术变更。
+===
+===TableC-1 Issue B Change Location Affects First release of Version 1.0 − − TableC-2 Differences between issue B and issue C Change Location Affects Additional section describing the chapter layout of Version 2.0 of the document AXI revisions on page A1-21 All revisions Additional details on the constraints for the VALID and READY handshake Handshake process on page 3-2 All revisions Additional equation for wrapping bursts Burst address on page 4-7 All revisions Additional chapter describing the AXI4 update to the AXI3 protocol Chapter 13 AXI4 All revisions Additional chapter describing the AXI4-Lite subset of the AXI4 protocol Chapter 14 AXI4-Lite All revisions TableC-3 Differences between issue C and issue D Change Location Affects Full integration of the AXI3 and AXI4 content Part A AXI3 and AXI4 Protocol Specification All revisions Additional Part added describing the ACE update Part C AXI Coherency Extensions (ACE) Protocol Specification All revisions to the AXI protocol ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---表 C-1问题 B 更改位置影响第一版本1.0-表 C-2问题 B 和问题 C 之间的差异更改位置影响附加部分描述了文档2.0版本的章节布局AXI3协议的 AXI4更新版本第13章 AXI4所有修订版本第14章 AXI4协议的 AXI4-Lite 子集第14章 AXI4-Lite 所有修订版本第3-2页有关 VALID 和 READY 握手过程的限制的更多细节第4-7页有关包装爆发的附加方程第4-7页有关爆发地址的附加修订版本第13章 AXI4所有修订版本第13章 AXI4协议的 AXI4-Lite 子集第14章 AXI4-Lite 所有修订版本表 C -D 更改位置影响 AXI3和 AXI4内容的完全集成第 A 部分 AXI3和 AXI4协议规范所有修订增加了描述 ACE 更新的第 C 部分 AXI 一致性扩展(ACE)协议规范所有对 AXI 协议的修订 ARM IHI 0022E 版权所有2003,2004,2010,2011,2013 ARM。
+===
+===All rights reserved.
+---保留所有权利
+===
+===AppxC-321 ID033013 Non-Confidential
+---附件 C-321 ID033013非保密
+===
+===AppendixC Revisions TableC-4 Differences between issue D and issue E Change Location Affects Clarification of the byte lane strobes’ requirement for FIXED bursts Burst type in Address structure on All revisions pageA3-46 Correction to pseudo code routine: //Increment address if necessary Pseudocode description of the All revisions transfers on pageA3-50 Additional section describing the Ordered_Write_Observation property Ordered write observation on All revisions pageA6-91 Additional section describing the Multi_Copy_Atomocity property Multi-copy write atomicity on All revisions pageA7-95 Clarification of the peripheral slave transaction subset Memory slaves and peripheral slaves All revisions on pageA10-115 Additional section describing the AWUNIQUE signal AWUNIQUE signal on pageC3-167 All revisions Clarification of WriteUnique Propagation to Main Memory WriteUnique on pageC4-209 and All revisions WriteLineUnique on pageC4-209 Additional section describing the WriteEvict transaction WriteEvict on pageC4-211 All revisions Clarification of WriteNoSnoop blocked by WriteUnique and Restrictions on WriteUnique and All revisions WriteLineUnique WriteLineUnique usage on pageC4-212 Clarification of sequencing Coherent and Cache Maintenance transactions to Sequencing transactions on All revisions a cache line pageC6-235 Additional section describing the Continuous_Cache_Line_Read_Data Continuous read data return on All revisions property pageC6-236 Clarification of Exclusive Accesses and naturally evicted cache lines Exclusive Store on pageC9-272 All revisions Clarification of the Shareable terminology in Exclusive Accesses About Exclusive accesses on All revisions pageC9-270 and Transaction requirements on pageC9-278 Additional section describing optional DVM message support for ARMv8 DVM message support for ARMv7 All revisions and ARMv8 on pageC12-294 Additional section describing DVMv7 and DVMv8 address spaces DVMv7 and DVMv8 address spaces All revisions on pageC12-297 Additional format definitions for DVMv8 messages DVM transactions format on All revisions pageC12-299 Additional format definitions for the TLB Invalidate message to support TLB Invalidate on pageC12-302 All revisions DVMv8 Additional section describing DVMv7 and DVMv8 conversion DVMv7 and DVMv8 conversion on All revisions pageC12-310 Additional chapter providing a set of recommendations for the design of ChapterC14 Master Design All revisions master components Recommendations Additional appendix describing full cache line and partial cache line write AppendixA Transaction Naming All revisions transaction naming Additional appendix describing the ACP interface requirements AppendixB Accelerator Coherency All revisions Port Interface Restrictions AppxC-322 Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---附录 C 修订表 C-4问题 D 和问题 E 更改位置之间的差异影响澄清字节车道闪光灯对 FIXED 突发的要求地址结构中的突发类型在所有修订版页面 A3-46修正伪代码例程://增量地址如有必要在页面 A3-50上对所有修订版本进行伪代码描述描述有序写观察属性有序写观察在所有修订版页面 A6-91描述 Multi _ Copy _ Atomocity 属性多拷贝写原子性的附加部分所有修订 pageA7-95外围从事务子集的澄清内存奴隶和外围奴隶的所有修订 pageA10-115附加部分描述 AWUNIQUE 信号的 AWUNIQUE 信号在 pageC3-167所有修订对 WriteUnique 传播到 Main 的澄清在 pageC4-209上的 Memory WriteUnique 和在 pageC4-209上的所有修订 WriteLineUnique 描述 WriteEvict 事务的附加部分 WriteEvict 在 pageC4-211上的所有修订 WriteEvict 澄清 WriteNoSnoop 被 WriteUnique 阻止，并限制 WriteUnique 和所有修订 WriteLineUnique WriteLineUnique 的使用在 pageC4-212上澄清测序一致性和缓存维护事务对所有修订的事务进行排序缓存线 pageC6-235附加部分描述持续缓存线读取数据持续读取数据返回所有修订属性 pageC6-236澄清独占访问和自然驱逐缓存线专用存储在 pageC9-272上的所有修订关于独占访问的共享术语的澄清在所有修订 pageC9-270上的独占访问和在 pageC9-278上的交易要求描述可选 DVM 的附加部分消息支持 ARMv8 DVM 消息支持 ARMv7在 pageC12-294上的所有修订版本和 ARMv8描述 DVMv7和 DVMv8地址空间的附加部分 DVMv7和 DVMv8地址空间在 pageC12-297上的所有修订版本 DVMv8消息的附加格式定义所有修订版本的 DVM 事务格式页面 C12-299 TLB 无效消息的附加格式定义，以支持 TLB 无效在页面 C12-302所有修订版本 DVMv8描述 DVMv7和 DVMv8转换的附加部分 DVMv7和 DVMv8转换在所有修订版本上第14章主设计所有版本主元件建议附录描述全缓存线路和部分缓存线路写附录 A 事务命名所有版本事务命名附录描述 ACP 接口要求附录 B 加速器一致性所有版本港口接口限制附录 C-322版权所有版本港口接口限制2003,2004,2010,2011,2013 ARM。
+===
+===All rights reserved.
+---保留所有权利
+===
+===ARM IHI 0022E Non-Confidential ID033013
+---ARM IHI 0022E 非机密 ID033013
+===
+===Glossary Aligned A data item stored at an address that is divisible by the highest power of 2 that divides into its size in bytes.
+---存储在地址上的一种数据项，可以用2的最大幂除以它的大小(以字节为单位)。
+===
+===Aligned halfwords, words and doublewords therefore have addresses that are divisible by 2, 4 and 8 respectively.
+---因此，对齐的半字、单词和双字的地址分别可以被2、4和8整除。
+===
+===An aligned access is one where the address of the access is aligned to the size of each element of the access.
+---对齐访问是指访问的地址与访问的每个元素的大小对齐。
+===
+===At approximately the same time Two events occur at approximately the same time if a remote observer might not be able to determine the order in which they occurred.
+---如果远程观察者可能无法确定事件发生的顺序，那么两个事件几乎同时发生。
+===
+===AXI beat See Beat.
+---Axl 击败 See Beat。
+===
+===AXI burst See Burst.
+---轴爆。
+===
+===AXI transaction See Transaction.
+---Axl 事务参见事务。
+===
+===Barrier An operation that forces a defined ordering of other actions.
+---一种强制执行其他操作的定义顺序的操作。
+===
+===Beat An individual data transfer within an AXI burst.
+---击败 AXI 突发事件中的单个数据传输。
+===
+===See also Burst, Transaction.
+---参见爆发，交易。
+===
+===Big-endian memory Means that the most significant byte (MSB) of the data is stored in the memory location with the lowest address.
+---大端存储器意味着数据的最高有效字节(MSB)存储在具有最低地址的存储器位置。
+===
+===See also Endianness, Little-endian memory, Blocking Describes an operation that prevents following actions from continuing until the operation completes.
+---另请参阅 Endianness、 Little-endian 内存、阻塞描述阻止后续操作继续直到操作完成的操作。
+===
+===A non-blocking operation can permit following operations to continue before it completes.
+---非阻塞操作可以允许在完成之前继续执行下列操作。
+===
+===Branch prediction Is where a processor selects a future execution path to fetch along.
+---分支预测是处理器选择未来执行路径的地方。
+===
+===For example, after a branch instruction, the processor can choose to speculatively fetch either the instruction following the branch or the instruction at the branch target.
+---例如，在分支指令之后，处理器可以选择猜测性地获取分支后面的指令或分支目标处的指令。
+===
+===See also Prefetching.
+---参见预取。
+===
+===ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+===
+===All rights reserved.
+---保留所有权利
+===
+===Glossary-323 ID033013 Non-Confidential
+---词汇 -323 ID033013非机密
+===
+===Glossary Burst In an AXI transaction, the payload data is transferred in a single burst, that can comprise multiple beats, or individual data transfers.
+---词汇突发在 AXI 事务中，有效载荷数据在一次突发中传输，可以包括多次突发或单次数据传输。
+===
+===See also Beat, Transaction.
+---参见《节拍，交易》。
+===
+===Byte An 8-bit data item.
+---一个8位数据项。
+===
+===Cache Any cache, buffer, or other storage structure in a caching master that can hold a copy of the data value for a particular address location.
+---缓存缓存主机中可以保存特定地址位置的数据值副本的任何缓存、缓冲区或其他存储结构。
+===
+===Cache hit A memory access that can be processed at high speed because the data it addresses is already in the cache.
+---高速缓存命中一种可以高速处理的内存访问，因为它所寻址的数据已经在高速缓存中。
+===
+===Cache line The basic unit of storage in a cache.
+---缓存线缓存中的基本存储单元。
+===
+===Its size in words is always a power of two.
+---它在语言上的大小总是二的幂次方。
+===
+===A cache line must be aligned to the size of the cache line.
+---缓存线路必须与缓存线路的大小对齐。
+===
+===The size of the cache line is equivalent to the coherency granule.
+---缓存线的大小等效于相干粒度。
+===
+===See also Coherency granule.
+---参见连贯性颗粒。
+===
+===Cache miss A memory access that cannot be processed at high speed because the data it addresses is not in the cache.
+---高速缓存未命中由于其所寻址的数据不在高速缓存中而无法高速处理的内存访问。
+===
+===Caching master A master component that has a hardware-coherent cache.
+---具有硬件一致性缓存的主组件。
+===
+===A caching master has a snoop address and snoop response channel, and optionally, a snoop data channel.
+---缓存主机具有 snoop 地址和 snoop 响应通道，以及可选的 snoop 数据通道。
+===
+===A master component might have only non-coherent caches.
+---主组件可能只有非一致性缓存。
+===
+===These caches can be for private data or they can be software-managed to ensure coherency.
+---这些缓存可以用于私有数据，也可以通过软件管理来确保一致性。
+===
+===A master with a non-coherent cache is not a caching master.
+---具有非一致性缓存的主服务器不是缓存主服务器。
+===
+===That is, the term caching master refers to a master with a cache that the ACE protocol must keep coherent.
+---也就是说，术语缓存主机是指拥有 ACE 协议必须保持一致的缓存的主机。
+===
+===See also Initiating master, Master component, Snooped master.
+---另见初始化主控、主控组件、 Snoopedmaster。
+===
+===Coherent Data accesses from a set of observers to a memory location are coherent accesses to that memory location by the members of the set of observers are consistent with there being a single total order of all writes to that memory location by all members of the set of observers.
+---一组观察者对一个内存位置的一致性数据访问是一组观察者成员对该内存位置的一致性访问，这与观察者集合的所有成员对该内存位置的所有写操作的总次序是一致的。
+===
+===Coherency granule The minimum size of the block of memory affected by any coherency consideration.
+---一致性颗粒: 受一致性考虑影响的内存块的最小大小。
+===
+===For example, an operation to make two copies of an address coherent makes the two copies of a block of memory coherent, where that block of memory is: • at least the size of the coherency granule • aligned to the size of the coherency granule.
+---例如，一个操作使一个地址的两个副本连贯，使一个内存块的两个副本连贯，其中该内存块是: •至少连贯性颗粒的大小•对齐连贯性颗粒的大小。
+===
+===In the ACE specification, the coherency granule is the cache line size.
+---在 ACE 规范中，一致性粒度是缓存行的大小。
+===
+===See also Cache line.
+---另请参见 Cache line。
+===
+===Component A distinct functional unit that has at least one AMBA interface.
+---具有至少一个 AMBA 接口的独特功能单元。
+===
+===Component can be used as a general term for master, slave, peripheral, and interconnect components.
+---组件可以作为主、从、外围和互连组件的通用术语。
+===
+===See also Interconnect component, Master component, Memory slave component, Peripheral slave component, Slave component.
+---另见互连组件、主组件、内存从组件、外围从组件、从组件。
+===
+===Device See Peripheral slave component.
+---设备见外设从组件。
+===
+===Downstream An AXI transaction operates between a master component and one or more slave components, and can pass through one or more intermediate components.
+---下游 AXI 事务在主组件和一个或多个从组件之间操作，可以通过一个或多个中间组件。
+===
+===At any intermediate component, for a given transaction, downstream means between that component and a destination slave component, and includes the destination slave component.
+---在任何中间组件中，对于给定的事务，下游意味着在该组件和目标从组件之间，并且包括目标从组件。
+===
+===Downstream and upstream are defined relative to the transaction as a whole, not relative to individual data flows within the transaction.
+---下游和上游是相对于整个事务定义的，而不是相对于事务中的单个数据流定义的。
+===
+===See also Master component, Slave component, Upstream.
+---参见主控组件，从组件，上游。
+===
+===Glossary-324 Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---术语表 -324版权所有2003,2004,2010,2011,2013 ARM。
+===
+===All rights reserved.
+---保留所有权利
+===
+===ARM IHI 0022E Non-Confidential ID033013
+---ARM IHI 0022E 非机密 ID033013
+===
+===Glossary Downstream cache A downstream cache is defined from the perspective of an initiating master.
+---词汇表下游缓存下游缓存是从发起主机的角度定义的。
+===
+===A downstream cache for a master is one that it accesses using the fundamental AXI transaction channels.
+---主缓存的下游缓存是它使用基本的 AXI 事务通道访问的缓存。
+===
+===An initiating master can allocate cache lines into a downstream cache.
+---初始化主机可以将缓存线路分配到下游缓存中。
+===
+===See also Downstream, Initiating master.
+---参见下游，启动主人。
+===
+===Deprecated Something that is present in the specification for backwards compatibility.
+---为向后兼容而在规范中出现的东西。
+===
+===Whenever possible you must avoid using deprecated features.
+---只要有可能，就必须避免使用过时的特性。
+===
+===These features might not be present in future versions of the specification.
+---这些特性可能不会出现在规范的未来版本中。
+===
+===Endianness An aspect of the system memory mapping.
+---Endianness 系统内存映射的一个方面。
+===
+===See also Big-endian memory and Little-endian memory.
+---参见 Big-endian 记忆和 Little-endian 记忆。
+===
+===Hit See Cache hit.
+---点击 See Cache。
+===
+===IMPLEMENTATION DEFINED Means that the behavior is not defined by this specification, but must be defined and documented by individual implementations.
+---IMPLEMENTATION DEFINED 意思是行为不是由本规范定义的，而是必须由各个实现定义和记录。
+===
+===In a timely manner The protocol cannot define an absolute time within which something must occur.
+---协议不能确定事情必须发生的绝对时间。
+===
+===However, in a sufficiently idle system, it will make progress and complete without requiring any explicit action.
+---然而，在一个足够空闲的系统中，它将取得进展并完成，而不需要任何明确的操作。
+===
+===Initiating master A master that issues a transaction that starts a sequence of events.
+---启动主机发出启动一系列事件的事务的主机。
+===
+===When describing a sequence of transactions, the term initiating master distinguishes the master that triggers the sequence of events from any snooped master that is accessed as a result of the action of the initiating master.
+---在描述事务序列时，术语“启动主机”将触发事件序列的主机与由于启动主机的操作而被访问的任何被监视主机区分开来。
+===
+===Initiating master is a temporal definition, meaning it applies at particular points in time, and typically is used when describing sequences of events.
+---初始化主控是一个时间定义，意味着它适用于特定的时间点，通常用于描述事件序列。
+===
+===A master that is an initiating master for one sequence of events can be a snooped master for another sequence of events.
+---作为一个事件序列的发起主机的主机可以是另一个事件序列的窥探主机。
+===
+===See also Caching master, Downstream cache, Local cache, Peer cache, Snooped master.
+---参见缓存主机，下游缓存，本地缓存，对等缓存，Snooped 主机。
+===
+===Interconnect component A component with more than one AMBA interface that connects one or more master components to one or more slave components An interconnect component can be used to group together either: • a set of masters so that they appear as a single master interface • a set of slaves so that they appear as a single slave interface.
+---互连组件一个具有多个 AMBA 接口的组件，它将一个或多个主组件连接到一个或多个从组件。互连组件可以用来组合: •一组主组件，使它们看起来像一个单一的主接口•一组从组件，使它们看起来像一个单一的从接口。
+===
+===See also Component, Master component, Slave component.
+---另请参见组件、主组件、从组件。
+===
+===Line See Cache line.
+---查看缓存行。
+===
+===Little-endian memory Means that the least significant byte (LSB) of the data is stored in the memory location with the lowest address.
+---Little-endian 存储器意味着数据的最低有效字节(LSB)存储在具有最低地址的存储器位置。
+===
+===See also Big-endian memory, Endianness.
+---参见 Big-endian memory，Endianness。
+===
+===Load The action of a master component reading the value held at a particular address location.
+---读取在特定地址位置保存的值的主组件的操作。
+===
+===For a processor, a load occurs as the result of executing a particular instruction.
+---对于处理器，负载是执行特定指令的结果。
+===
+===Whether the load results in the master issuing a read transaction depends on whether the accessed cache line is held in the local cache.
+---负载是否导致主服务器发出读取事务取决于访问的缓存行是否保存在本地缓存中。
+===
+===See also Caching master, Speculative read, Store.
+---另见缓存主机，投机阅读，存储。
+===
+===Local cache A local cache is defined from the perspective of an initiating master.
+---本地缓存从发起主机的角度定义本地缓存。
+===
+===A local cache is one that is internal to the master.
+---本地缓存是主缓存的内部缓存。
+===
+===Any access to the local cache is performed within the master.
+---对本地缓存的任何访问都在主服务器中执行。
+===
+===See also Initiating master, Peer cache.
+---参见初始化主机，对等缓存。
+===
+===ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+===
+===All rights reserved.
+---保留所有权利
+===
+===Glossary-325 ID033013 Non-Confidential
+---词汇 -325 ID033013非机密
+===
+===Glossary Main memory The memory that holds the data value of an address location when no cached copies of that location exist.
+---词汇表主存储器当地址位置的缓存副本不存在时，保存该位置的数据值的存储器。
+===
+===For any location, main memory can be out of date with respect to the cached copies of the location, but main memory is updated with the most recent data value when no cached copies exist.
+---对于任何位置，相对于该位置的缓存副本，主存可能过期，但如果不存在缓存副本，则使用最新的数据值更新主存。
+===
+===Main memory can be referred to as memory when the context makes the intended meaning clear.
+---主记忆可以被称为记忆时，上下文使预期的意思清楚。
+===
+===Master component A component that initiates transactions.
+---启动事务的组件。
+===
+===It is possible that a single component can act as both a master component and as a slave component.
+---单个组件可以同时充当主组件和从组件。
+===
+===For example, a Direct Memory Access (DMA) component can be a master component when it is initiating transactions to move data, and a slave component when it is being programmed.
+---例如，直接内存访问(DMA)组件在启动事务以移动数据时可以是主组件，在编程时可以是从组件。
+===
+===See also Component, Interconnect component, Slave component.
+---另见组件、互连组件、从组件。
+===
+===Memory barrier See Barrier.
+---记忆障碍参见。
+===
+===Memory Management Unit (MMU) Provides detailed control of the part of a memory system that provides address translation.
+---内存管理单元(MMU)提供对提供地址转换的内存系统部分的详细控制。
+===
+===Most of the control is provided using translation tables that are held in memory, and define the attributes of different regions of the physical memory map.
+---大多数控件使用存储在内存中的转换表提供，并定义物理内存映射的不同区域的属性。
+===
+===See also System Memory Management Unit (SMMU).
+---另请参阅系统内存管理单元(SMMU)。
+===
+===Memory slave component A memory slave component, or memory slave, is a slave component with the following properties: • a read of a byte from a memory slave returns the last value written to that byte location • a write to a byte location in a memory slave updates the value at that location to a new value that is obtained by subsequent reads • reading a location multiple times has no side-effects on any other byte location • reading or writing one byte location has no side effects on any other byte location.
+---内存从组件内存从组件或内存从组件是一个从组件，具有以下属性: •从内存从组件读取一个字节，返回写入该字节位置的最后一个值•写入内存从组件中的一个字节位置，将该位置的值更新为后续读取所获得的新值•多次读取一个位置对任何其他字节位置没有副作用•读取或写入一个字节位置对任何其他字节位置没有副作用。
+===
+===See also Component, Master component, Peripheral slave component.
+---另见组件、主组件、外设从组件。
+===
+===Miss See Cache miss.
+---思思小姐，思思小姐。
+===
+===MMU See Memory Management Unit (MMU).
+---查看内存管理单元。
+===
+===Observer A processor or other master component, such as a peripheral device, that can generate reads from or writes to memory.
+---观察器一种处理器或其它主组件，如外围设备，它可以从内存中生成读或写。
+===
+===Peer cache A peer cache is defined from the perspective of an initiating master.
+---对等缓存从发起主机的角度定义对等缓存。
+===
+===A peer cache for that master is one that is accessed using the snoop channels.
+---该主机的对等缓存是使用 snoop 通道访问的对等缓存。
+===
+===An initiating master cannot allocate cache lines into a peer cache.
+---启动主机无法将缓存线路分配到对等缓存中。
+===
+===See also Initiating master, Local cache.
+---另请参见初始化主缓存、本地缓存。
+===
+===Peripheral slave component A peripheral slave component is also described as a peripheral slave.
+---外围从组件外围从组件也被描述为外围从组件。
+===
+===This specification recommends that a peripheral slave has an IMPLEMENTATION DEFINED method of access that is typically described in the data sheet for the component.
+---本规范建议外围从服务器具有 IMPLEMENTATION DEFINED 访问方法，该方法通常在组件的数据表中描述。
+===
+===Any access that is not defined as permitted might cause the peripheral slave to fail, but must complete in a protocol-correct manner to prevent system deadlock.
+---任何未被定义为允许的访问都可能导致外围从服务器失败，但必须以正确的协议方式完成，以防止系统死锁。
+===
+===The protocol does not require continued correct operation of the peripheral.
+---该协议不需要继续正确操作的外围设备。
+===
+===In the context of the descriptions in this specification, peripheral slave is synonymous with peripheral, peripheral component, peripheral device, and device.
+---在本规范描述的上下文中，外围从设备是外围设备、外围元件、外围设备和设备的同义词。
+===
+===See also Memory slave component, Slave component.
+---参见内存从组件，从组件。
+===
+===Permission to store A master component has permission to store if it can perform a store to the associated cache line without informing any other caching master or the interconnect.
+---存储权限如果主组件可以在不通知任何其他缓存主机或互连的情况下将存储执行到关联的缓存线路，则主组件具有存储权限。
+===
+===See also Caching master, Master component, Permission to update main memory, Store.
+---另请参阅缓存主机、主组件、更新主内存的权限、存储。
+===
+===Glossary-326 Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---术语表 -326版权所有2003,2004,2010,2011,2013 ARM。
+===
+===All rights reserved.
+---保留所有权利
+===
+===ARM IHI 0022E Non-Confidential ID033013
+---ARM IHI 0022E 非机密 ID033013
+===
+===Glossary Permission to update main memory A master component has permission to update main memory if the master can perform a write transaction to main memory.
+---更新主内存的权限如果主组件可以对主内存执行写事务，则主组件有权更新主内存。
+===
+===The ACE protocol ensures that no other master performs a write transaction to the same cache location at the same time.
+---ACE 协议确保没有其他主机同时向相同的缓存位置执行写事务。
+===
+===See also Caching master, Master component, Main memory, Permission to store, Store.
+---另见缓存主机、主机组件、主存储器、存储权限、存储。
+===
+===Prefetching Prefetching refers to speculatively fetching instructions or data from the memory system.
+---预取预取是指推测性地从内存系统中获取指令或数据。
+===
+===In particular, instruction prefetching is the process of fetching instructions from memory before the instructions that precede them, in simple sequential execution of the program, have finished executing.
+---特别地，指令预取是指在程序的简单顺序执行中，在前面的指令完成执行之前从内存中取出指令的过程。
+===
+===Prefetching an instruction does not mean that the instruction has to be executed.
+---预取指令并不意味着必须执行该指令。
+===
+===In this manual, references to instruction or data fetching apply also to prefetching, unless the context explicitly indicates otherwise.
+---在本手册中，对指令或数据获取的引用也适用于预取，除非上下文明确表示不适用。
+===
+===Slave component A component that receives transactions and responds to them.
+---从组件接收事务并对其作出响应的组件。
+===
+===It is possible that a single component can act as both a slave component and as a master component.
+---单个组件可以同时作为从组件和主组件。
+===
+===For example, a Direct Memory Access (DMA) component can be a slave component when it is being programmed and a master component when it is initiating transactions to move data.
+---例如，直接内存访问(DMA)组件在编程时可以是从组件，在启动事务以移动数据时可以是主组件。
+===
+===See also Master component, Memory slave component, Peripheral slave component.
+---参见主控组件，内存从组件，外设从组件。
+===
+===Snooped cache A hardware-coherent cache on a snooped master.
+---Snoop 缓存 Snoop 主机上的硬件一致性缓存。
+===
+===That is, it is a hardware-coherent cache that receives snoop transactions.
+---也就是说，它是一个接收 snoop 事务的硬件一致性缓存。
+===
+===The term snooped cache is used in preference to the term snooped master when the sequence of events being described only involves the cache and does not involve any actions or events on the associated master.
+---当所描述的事件序列仅涉及缓存且不涉及相关主服务器上的任何操作或事件时，优先使用术语 snoop cache 而不使用术语 snoop master。
+===
+===See also Snooped master, Snoop filter A precise snoop filter that is able to track precisely the cache lines that might be allocated within a master.
+---另请参阅 Snoop master，Snoop filter 一个精确的 Snoop 过滤器，能够精确地跟踪可能在 master 中分配的缓存线路。
+===
+===Snooped master A caching master that receives snoop transactions.
+---接收 snoop 事务的缓存主机。
+===
+===Snooped master is a temporal definition, meaning it applies at particular points in time, and typically is used when describing sequences of events.
+---Snoop master 是一个时间定义，意思是它适用于特定的时间点，通常用于描述事件序列。
+===
+===A master that is a snooped master for one sequence of events can be an initiating master for another sequence of events.
+---作为一个事件序列的窥探主机可以作为另一个事件序列的初始主机。
+===
+===See also Caching master, Initiating master, Snooped cache.
+---另请参见缓存主机、初始化主机、 Snooped 缓存。
+===
+===Speculative read A transaction that a master issues when it might not need the transaction to be performed because it already has a copy of the accessed cache line in its local cache.
+---投机性读取当主服务器可能不需要执行该事务时发出的事务，因为它在本地缓存中已经有了访问的缓存行的副本。
+===
+===Typically, a master issues a speculative read in parallel with a local cache lookup.
+---通常，主服务器发出与本地缓存查找并行的推测性读取。
+===
+===This gives lower latency than looking in the local cache first, and then issuing a read transaction only if the required cache line is not found in the local cache.
+---这比首先查找本地缓存，然后仅当在本地缓存中没有找到所需的缓存行时才发出读事务的延迟要低。
+===
+===See also Caching master, Load.
+---另见缓存主机，加载。
+===
+===Store The action of a master component changing the value held at a particular address location.
+---存储主组件更改保存在特定地址位置的值的操作。
+===
+===For a processor, a store occurs as the result of executing a particular instruction.
+---对于处理器，存储是执行特定指令的结果。
+===
+===Whether the store results in the master issuing a read or write transaction depends on whether the accessed cache line is held in the local cache, and if it is in the local cache, the state it is in.
+---存储是否导致主服务器发出读或写事务取决于被访问的缓存行是否保存在本地缓存中，以及如果它在本地缓存中，它所处的状态。
+===
+===See also Caching master, Load, Permission to update main memory, Permission to store.
+---另请参阅缓存主机、加载、更新主存的权限、存储的权限。
+===
+===Synchronization barrier See Barrier.
+---同步屏障参见屏障。
+===
+===ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---ARM IHI 0022E Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+===
+===All rights reserved.
+---保留所有权利
+===
+===Glossary-327 ID033013 Non-Confidential
+---词汇 -327 ID033013非机密
+===
+===Glossary System Memory Management Unit (SMMU) A system-level MMU.
+---词汇系统内存管理单元(SMMU)系统级 MMU。
+===
+===That is, a system component that provides address translation from a one address space to another.
+---也就是说，提供从一个地址空间到另一个地址空间的地址转换的系统组件。
+===
+===An SMMU provides one or more of: • virtual address (VA) to physical address (PA) translation • VA to intermediate physical address (IPA) translation • IPA to PA translation.
+---一个 SMMU 提供一个或多个: •虚拟地址(VA)到物理地址(PA)的转换• VA 到中间物理地址(IPA)的转换• IPA 到 PA 的转换。
+===
+===TLB See Translation Lookaside Buffer (TLB).
+---见转译后备缓冲器。
+===
+===Transaction An AXI master initiates an AXI transaction to communicate with an AXI slave.
+---事务 AXI 主机发起一个 AXI 事务来与 AXI 从机进行通信。
+===
+===Typically, the transaction requires information to be exchanged between the master and slave on multiple channels.
+---通常，事务需要在多个通道上的主从之间交换信息。
+===
+===The complete set of required information exchanges form the AXI transaction.
+---AXI 事务形成所需信息交换的完整集合。
+===
+===See also Beat, Burst.
+---参见节拍，爆发。
+===
+===Translation Lookaside Buffer (TLB) A memory structure containing the results of translation table walks.
+---转译后备缓冲器(TLB)包含转换表行走结果的存储结构。
+===
+===TLBs help to reduce the average cost of a memory access.
+---TLB 有助于降低内存访问的平均成本。
+===
+===See also System Memory Management Unit (SMMU), Translation table, Translation table walk.
+---参见系统内存管理单元(SMMU) ，翻译表，翻译表步。
+===
+===Translation table A table held in memory that defines the properties of memory areas of various sizes from 1KB.
+---存储在内存中的一个表，它定义了1KB 以内不同大小的内存区域的属性。
+===
+===See also Translation Lookaside Buffer (TLB), Translation table walk.
+---参见转译后备缓冲器(TLB) ，翻译桌步。
+===
+===Translation table walk The process of doing a full translation table lookup.
+---翻译表行走完整翻译表查找的过程。
+===
+===See also Translation Lookaside Buffer (TLB), Translation table.
+---参见转译后备缓冲器(TLB) ，翻译表。
+===
+===Unaligned An unaligned access is an access where the address of the access is not aligned to the size of an element of the access.
+---未对齐访问是指访问的地址与访问元素的大小不对齐的访问。
+===
+===Unaligned memory accesses Are memory accesses that are not, or might not be, appropriately halfword-aligned, word-aligned, or doubleword-aligned.
+---未对齐的内存访问是指没有或可能没有适当地半字对齐、字对齐或双字对齐的内存访问。
+===
+===See also Aligned on pageGlossary-323 UNPREDICTABLE In the AMBA AXI and ACE Architecture means that the behavior cannot be relied upon.
+---在 AMBA AXI 和 ACE 架构中，不可预测意味着行为不可靠。
+===
+===UNPREDICTABLE behavior must not be documented or promoted as having a defined effect.
+---不可预测的行为不能被记录或宣传为具有明确的效果。
+===
+===Upstream An AXI transaction operates between a master component and one or more slave components, and can pass through one or more intermediate components.
+---上游 AXI 事务在主组件和一个或多个从组件之间操作，可以通过一个或多个中间组件。
+===
+===At any intermediate component, for a given transaction, upstream means between that component and the originating master component, and includes the originating master component.
+---在任何中间组件中，对于给定的事务，上游意味着该组件与原始主组件之间的位置，并且包括原始主组件。
+===
+===Downstream and upstream are defined relative to the transaction as a whole, not relative to individual data flows within the transaction.
+---下游和上游是相对于整个事务定义的，而不是相对于事务中的单个数据流定义的。
+===
+===See also Downstream, Master component, Slave component.
+---参见下游，主组件，从组件。
+===
+===Write-Back cache A cache in which when a cache hit occurs on a store access, the data is only written to the cache.
+---写回缓存在存储访问中发生缓存命中时，数据只写入缓存的缓存。
+===
+===Data in the cache can therefore be more up-to-date than data in main memory.
+---因此，缓存中的数据可以比主存中的数据更新。
+===
+===Any such data is written back to main memory when the cache line is cleaned or re-allocated.
+---当清理或重新分配缓存行时，任何这样的数据都会写回主存。
+===
+===Another common term for a Write-Back cache is a copy-back cache.
+---写回缓存的另一个常见术语是复制回缓存。
+===
+===Write-Through cache A cache in which when a cache hit occurs on a store access, the data is written both to the cache and to main memory.
+---通过写入缓存当缓存访问发生命中时，数据被写入到缓存和主存中的缓存。
+===
+===This is normally done via a write buffer, to avoid slowing down the processor.
+---这通常是通过写缓冲区完成的，以避免降低处理器的速度。
+===
+===Glossary-328 Copyright ©2003, 2004, 2010, 2011, 2013 ARM.
+---术语表 -328版权所有2003,2004,2010,2011,2013 ARM。
+===
+===All rights reserved.
+---保留所有权利
+===
+===ARM IHI 0022E Non-Confidential ID033013
+---ARM IHI 0022E 非机密 ID033013
+===

@@ -1,7 +1,5 @@
 from pynput.keyboard import Controller, Key, Listener 
 import pyperclip
-import json
-import requests
 import os  
 import tkinter as tk  
 from tkinter import scrolledtext  
@@ -10,13 +8,8 @@ import threading
 from bs4 import BeautifulSoup  
 import webbrowser 
 import re
-import nltk
-from nltk.tokenize import word_tokenize, sent_tokenize  
-from nltk.tag import pos_tag  
-from nltk.stem import WordNetLemmatizer  
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
-nltk.download('wordnet')
+
+from trans_core import *
 
 ###### 全局变量 ######
 ctrl_c_str = r"'\x03'"
@@ -35,42 +28,10 @@ setting = {}
 transTextWindow = None
 copyTextWindow = None
 
-f = open("CaiYunXiaoYi.token")
-CaiYunXiaoYiToken = f.read()
 
 ######################
 
 ###### 翻译功能 ######
-def tranlateCaiYunXiaoYi(source, direction):
-    url = "http://api.interpreter.caiyunai.com/v1/translator"
-
-    # WARNING, this token is a test token for new developers,
-    # and it should be replaced by your token
-
-    payload = {
-        "source": source,
-        "trans_type": direction,
-        "request_id": "demo",
-        "detect": True,
-    }
-
-    headers = {
-        "content-type": "application/json",
-        "x-authorization": "token " + CaiYunXiaoYiToken,
-    }
-
-    response = requests.request("POST", url, data=json.dumps(payload), headers=headers)
-
-    return json.loads(response.text)["target"]
-
-def split_string_by_english_sentences(input_string):  
-    # 将换行符替换为空格  
-    input_string_no_newline = input_string.replace('\r', ' ')
-    input_string_no_newline = input_string_no_newline.replace('\n', ' ')
-
-    sentences = nltk.sent_tokenize(input_string_no_newline)
-
-    return input_string_no_newline, sentences
 
 def tranlateMain(source_content):
     no_newline_content, tranlate_source = split_string_by_english_sentences(source_content)

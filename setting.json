@@ -1,11 +1,21 @@
 {
     "save": {
-        "isSave": true,
+        "isSave": false,
         "savePath": "books",
-        "saveName": "gaudi3.txt",
+        "saveName": "AMBA AXI3 and AXI4 Protocol Specification.txt",
         "saveSource": true
     },
     "show": {
         "showSource": true
-    }
+    },
+    "saveNameList": [
+        "A-Primer-on-Memory-Consistency-and-Cache-Coherence-2nd-Edition.txt",
+        "A Scalable Front-End Architecture for Fast Instruction Delivery.txt",
+        "A Comprehensive Instruction Fetch Mechanism(BBTB).txt",
+        "Fetch-Directed-Instruction-Prefetching.txt",
+        "gaudi3.txt",
+        "rvv.txt",
+        "Intel® AVX-512 - Permuting Data Within and Between AVX Registers.txt",
+        "riscv-privileged-20211203.pdf"
+    ]
 }
