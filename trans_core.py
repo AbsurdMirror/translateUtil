@@ -48,7 +48,7 @@ def split_string_by_english_sentences(input_string):
 
     return input_string_no_newline, sentences
 
-def tranlateText(source_content):
+def translateText(source_content):
     if is_empty_or_whitespace_only(source_content):  
         return ""
     no_newline_content, tranlate_source = split_string_by_english_sentences(source_content)
@@ -57,7 +57,7 @@ def tranlateText(source_content):
     tranlate_source_target = ""
     i = 0
     for item in tranlate_source:
-        tranlate_source_target += "\n===\n" + item + "\n---" + tranlate_target[i] + "\n==="
+        tranlate_source_target += "- " + item + "\n- " + tranlate_target[i] + "\n<br>\n"
         i = i + 1
 
     return tranlate_source_target

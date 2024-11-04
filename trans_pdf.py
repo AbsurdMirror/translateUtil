@@ -3,18 +3,19 @@ import threading
 import queue  
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import io  
+import os
+import sys  
 
-from trans_core import tranlateText
+from trans_core import translateText
 from PyPDF2 import PdfReader, PdfWriter  
 from reportlab.lib.pagesizes import letter  
 from reportlab.pdfgen import canvas  
-import io  
 
 def add_text_to_pdf(text_to_add, pdf_path):  
     writer = PdfWriter()  
 
     # 读取现有的 PDF 文件  
-    import os
     if os.path.exists(pdf_path):  
         reader = PdfReader(pdf_path)  
         for page in reader.pages:  
@@ -73,16 +74,21 @@ def save_translated_text(translated_queue, output_dir_path):
     从队列中读取翻译后的文字，并保存到文件中  
     """  
     i = 0
+    with open(f"{output_dir_path}/contents.md", "w", encoding="utf-8") as file:  
+        file.write("")  
     while True:  
         translated_text = translated_queue.get()  
         if translated_text is None:  # 使用None作为结束信号  
             break       
         print(f"开始保存翻译后的文字到 {output_dir_path}/page_{i}.txt...")  
-        with open(f"{output_dir_path}/page_{i}.txt", "w", encoding="utf-8") as file:  
+        with open(f"{output_dir_path}/page_{i}.md", "w", encoding="utf-8") as file:  
             print(f"保存第{i}页的文字。")
+            file.write(f"- [返回目录](./contents.md) \n<br>\n")
             file.write(translated_text)  
             # add_text_to_pdf(translated_text, output_dir_path)
-            i += 1
+        with open(f"{output_dir_path}/contents.md", "a", encoding="utf-8") as file:  
+            file.write(f"- [page_{i}](./page_{i}.md) \n")
+        i += 1
     print(f"保存完成")  
   
 def main(pdf_path, trans_func, output_dir_path):  
@@ -114,6 +120,20 @@ def main(pdf_path, trans_func, output_dir_path):
     saver_thread.join()  
   
 if __name__ == "__main__":  
-    pdf_path = "C:/Users/dongzhengxiang/Downloads/IHI0022E_amba_axi_and_ace_protocol_spec-315-328.pdf"  # 替换为你的PDF文件路径  
-    output_dir_path = "tran_pdf_out"
-    main(pdf_path, tranlateText, output_dir_path) # trans)
+    # pdf_path = "C:/Users/dongzhengxiang/Downloads/IHI0022E_amba_axi_and_ace_protocol_spec-315-328.pdf"  # 替换为你的PDF文件路径  
+    # output_dir_path = "tran_pdf_out"
+
+    # 检查参数数量  
+    if len(sys.argv) != 3:  
+        print("Usage: python your_script.py <pdf_path> <output_dir_path>")  
+        sys.exit(1)  
+    
+    pdf_path = sys.argv[1]  
+    output_dir_path = sys.argv[2]  
+    
+    # 检查输出目录是否存在，如果不存在则创建  
+    if not os.path.exists(output_dir_path):  
+        os.makedirs(output_dir_path)  
+    
+    # 调用main函数  
+    main(pdf_path, translateText, output_dir_path)
