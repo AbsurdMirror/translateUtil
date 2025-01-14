@@ -28,6 +28,11 @@ setting = {}
 transTextWindow = None
 copyTextWindow = None
 
+print("update NLTK ...")  
+nltk_update()
+print("update NLTK finish.")
+print("欢迎使用 Translate Tool")
+
 
 ######################
 
