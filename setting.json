@@ -1,13 +1,14 @@
 {
     "save": {
-        "isSave": false,
+        "isSave": true,
         "savePath": "books",
-        "saveName": "AMBA AXI3 and AXI4 Protocol Specification.txt",
+        "saveName": "tdc22.txt",
         "saveSource": true
     },
     "show": {
         "showSource": true
     },
+    "useAI": true,
     "saveNameList": [
         "A-Primer-on-Memory-Consistency-and-Cache-Coherence-2nd-Edition.txt",
         "A Scalable Front-End Architecture for Fast Instruction Delivery.txt",

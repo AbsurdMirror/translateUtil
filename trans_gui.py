@@ -10,6 +10,7 @@ import webbrowser
 import re
 
 from trans_core import *
+from deepseek_api import *
 
 ###### 全局变量 ######
 ctrl_c_str = r"'\x03'"
@@ -50,10 +51,13 @@ def tranlateMain(source_content):
     print(f"去除换行: {no_newline_content} \n")
     print(f"句子拆分: {tranlate_source_formatted} \n")
     print(f"翻译结果: {tranlate_target_formatted} \n")
-    # print(f"Clipboard content: {source_content} \n")
-    # print(f"No newline content: {no_newline_content} \n")
-    # print(f"Translation source: {tranlate_source_formatted} \n")
-    # print(f"Translation target: {tranlate_target_formatted} \n")
+
+    if hasSetting:
+        if setting["useAI"]:
+            numbered_lines = [f"{index}: {line}" for index, line in enumerate(tranlate_target)]
+            numbered_lines = "\n".join(numbered_lines)
+            resp_text = group_sentences_to_paragraphs(numbered_lines)
+            print(f"AI段落拆分: \n{resp_text} \n")
 
     tranlate_source_target = []
     i = 0
