@@ -1,4 +1,4 @@
-*.token
+tokens_keys/
 save
 tran_pdf_out/
 __pycache__/

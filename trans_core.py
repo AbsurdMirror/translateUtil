@@ -5,7 +5,7 @@ from nltk.stem import WordNetLemmatizer
 import json
 import requests
 
-f = open("CaiYunXiaoYi.token")
+f = open("tokens_keys/CaiYunXiaoYi.token")
 CaiYunXiaoYiToken = f.read()
 
 def is_empty_or_whitespace_only(s):

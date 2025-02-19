@@ -8,9 +8,14 @@ import threading
 from bs4 import BeautifulSoup  
 import webbrowser 
 import re
+import sys
+
+# 添加模块路径到 sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'ai_group_sentences')))
 
 from trans_core import *
-from deepseek_api import *
+from ai_group_sentences.api_selector import group_sentences_to_paragraphs
+
 
 ###### 全局变量 ######
 ctrl_c_str = r"'\x03'"
@@ -56,7 +61,7 @@ def tranlateMain(source_content):
         if setting["useAI"]:
             numbered_lines = [f"{index}: {line}" for index, line in enumerate(tranlate_target)]
             numbered_lines = "\n".join(numbered_lines)
-            resp_text = group_sentences_to_paragraphs(numbered_lines)
+            resp_text = group_sentences_to_paragraphs(numbered_lines, setting["ai_model"])
             print(f"AI段落拆分: \n{resp_text} \n")
 
     tranlate_source_target = []
