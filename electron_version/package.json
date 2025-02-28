@@ -1,11 +1,12 @@
 {
   "name": "electron_version",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/main/index.js",
   "scripts": {
     "start": "chcp 65001 && electron .",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "electron-builder build --win"
+    "build": "node scripts/build.js",
+    "build:mac": "node scripts/build-mac.js"
   },
   "keywords": [],
   "author": "",
@@ -28,7 +29,8 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico"
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
@@ -40,15 +42,6 @@
     "files": [
       "src/**/*",
       "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "tokens_keys",
-        "to": "tokens_keys",
-        "filter": [
-          "*.token"
-        ]
-      }
     ]
   }
 }

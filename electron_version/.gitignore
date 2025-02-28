@@ -28,3 +28,5 @@ Thumbs.db
 # 日志文件
 logs/
 *.log
+
+electron-builder-cache/
