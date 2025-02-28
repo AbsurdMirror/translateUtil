@@ -5,15 +5,19 @@ const crypto = require('../utils/crypto');
 
 // 创建翻译器实例
 let decryptedKey = '';
+let decryptedToken = '';
 if (config.get('aiKey')) {
     decryptedKey = crypto.decrypt(config.get('aiKey'));
-    console.log('update-translator-config: Decrypted API Key:', config.get('aiKey'), decryptedKey);
+}
+if (config.get('translationToken')) {
+    decryptedToken = crypto.decrypt(config.get('translationToken'));
 }
 
 let translator = new Translator({
     aiProvider: config.get('aiProvider'),
     aiKey: decryptedKey,
-    useAI: config.get('useAI')
+    useAI: config.get('useAI'),
+    translationToken: decryptedToken
 });
 
 const sentenceProcessor = require('../utils/sentence');
@@ -86,19 +90,22 @@ class IPCHandler {
         ipcMain.handle('update-translator-config', async (event, newConfig) => {
             console.log('update-translator-config:', newConfig);
             try {
-                // 解密 API Key
+                // 解密 API Keys
                 let decryptedKey = '';
+                let decryptedToken = '';
                 if (newConfig.aiKey) {
                     decryptedKey = crypto.decrypt(newConfig.aiKey);
-                    console.log('update-translator-config: Decrypted API Key:', newConfig.aiKey, decryptedKey);
+                }
+                if (newConfig.translationToken) {
+                    decryptedToken = crypto.decrypt(newConfig.translationToken);
                 }
 
                 // 更新翻译器配置
-                console.log('update-translator-config: Updating translator config...');
                 translator = new Translator({
                     useAI: newConfig.useAI,
                     aiProvider: newConfig.aiProvider,
-                    aiKey: decryptedKey
+                    aiKey: decryptedKey,
+                    translationToken: decryptedToken
                 });
 
                 return { success: true };

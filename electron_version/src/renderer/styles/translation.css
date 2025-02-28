@@ -1,0 +1,215 @@
+/* 基础样式 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+    background: transparent;
+    color: #333;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* 翻译窗口 */
+.translation-window {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+/* 标题栏 */
+.translation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background-color: #2c3e50;
+    color: #fff;
+    -webkit-app-region: drag;
+}
+
+.translation-header button {
+    -webkit-app-region: no-drag;
+}
+
+.window-control {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.window-control:hover {
+    background-color: #34495e;
+}
+
+.window-control#closeBtn:hover {
+    background-color: #e74c3c;
+}
+
+/* 内容区域 */
+.translation-content {
+    flex: 1;
+    padding: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* 翻译结果项 */
+.translation-item {
+    margin-bottom: 12px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.translation-item .source {
+    color: #666;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.translation-item .target {
+    color: #2c3e50;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* 段落卡片 */
+.paragraph-card {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.paragraph-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #343a40;
+    padding: 12px 16px;
+    border-bottom: 1px solid #495057;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+}
+
+.paragraph-header:hover {
+    background: #2c3238;
+}
+
+.paragraph-summary {
+    flex: 1;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #f8f9fa;
+}
+
+.collapse-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #adb5bd;
+    font-size: 18px;
+    transition: transform 0.3s;
+}
+
+.paragraph-card.collapsed .collapse-btn {
+    transform: rotate(-90deg);
+}
+
+.paragraph-content {
+    padding: 12px 16px;
+    background: #fff;
+    border-radius: 0 0 8px 8px;
+}
+
+.paragraph-card.collapsed .paragraph-content {
+    display: none;
+}
+
+/* 句子列表 */
+.sentence-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sentence-item {
+    background: #e9ecef;
+    margin: 8px 0;
+    padding: 12px;
+    border-radius: 4px;
+}
+
+.sentence-item:hover {
+    background: #dee2e6;
+}
+
+/* 底部工具栏 */
+.translation-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #ddd;
+}
+
+/* 按钮样式 */
+.primary-btn {
+    padding: 6px 16px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.primary-btn:hover {
+    background-color: #2980b9;
+}
+
+.secondary-btn {
+    padding: 6px 16px;
+    background-color: #95a5a6;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.secondary-btn:hover {
+    background-color: #7f8c8d;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

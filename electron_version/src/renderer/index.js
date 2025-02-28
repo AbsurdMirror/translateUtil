@@ -14,7 +14,7 @@ class TranslatorUI {
         this.minimizeBtn = document.getElementById('minimizeBtn');
         this.maximizeBtn = document.getElementById('maximizeBtn');
         this.closeBtn = document.getElementById('closeBtn');
-
+        this.translationToken = document.getElementById('translationToken');
         // 文本区域
         this.sourceText = document.getElementById('sourceText');
         this.viewModeBtn = document.getElementById('viewModeBtn');
@@ -82,6 +82,7 @@ class TranslatorUI {
         this.useAI.onclick = () => this.saveConfig();
         this.aiProvider.onchange = () => this.saveConfig();
         this.aiKey.onchange = () => this.saveConfig();
+        this.translationToken.onchange = () => this.saveConfig();
         
         // 设置面板控制
         this.settingsBtn.onclick = () => this.toggleSettings(true);
@@ -94,7 +95,6 @@ class TranslatorUI {
             this.targetText.setAttribute('data-view-mode', newMode);
             this.viewModeBtn.textContent = newMode === 'both' ? '仅显示译文' : '显示原文';
         };
-    
     }
 
     // 加载配置
@@ -105,7 +105,11 @@ class TranslatorUI {
             this.useAI.checked = config.useAI;
             this.aiProvider.value = config.aiProvider;
             
-            // 解密并显示 API Key
+            // 解密并显示 token 和 API Key
+            if (config.translationToken) {
+                const decryptedToken = crypto.decrypt(config.translationToken);
+                this.translationToken.value = decryptedToken || '';
+            }
             if (config.aiKey) {
                 const decryptedKey = crypto.decrypt(config.aiKey);
                 this.aiKey.value = decryptedKey || '';
@@ -121,10 +125,15 @@ class TranslatorUI {
                 targetLang: this.targetLang.value
             },
             useAI: this.useAI.checked,
-            aiProvider: this.aiProvider.value
+            aiProvider: this.aiProvider.value,
+            aiKey: "",
+            translationToken: ""
         };
 
-        // 加密保存 API Key
+        // 加密保存 token 和 API Key
+        if (this.translationToken.value) {
+            config.translationToken = crypto.encrypt(this.translationToken.value);
+        }
         if (this.aiKey.value) {
             config.aiKey = crypto.encrypt(this.aiKey.value);
         }
@@ -133,6 +142,7 @@ class TranslatorUI {
         await ipcRenderer.invoke('set-config', 'useAI', config.useAI);
         await ipcRenderer.invoke('set-config', 'aiProvider', config.aiProvider);
         await ipcRenderer.invoke('set-config', 'aiKey', config.aiKey);
+        await ipcRenderer.invoke('set-config', 'translationToken', config.translationToken);
         
         // 通知主进程更新翻译器配置
         await ipcRenderer.invoke('update-translator-config', config);

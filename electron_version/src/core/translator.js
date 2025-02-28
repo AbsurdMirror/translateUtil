@@ -7,7 +7,9 @@ const AIParagraphGrouper = require('./ai_paragraph');
 class Translator {
     constructor(config) {
         this.tokenizer = new natural.SentenceTokenizer();
-        this.token = this.loadToken();
+        
+        // 从配置中获取 token
+        this.token = config.translationToken;
         
         // 初始化 AI 分段器
         console.log('apiKey', config.aiKey);
@@ -20,17 +22,6 @@ class Translator {
         console.log('this.useAI', this.useAI);
     }
     
-    // 加载彩云小译 API Token
-    loadToken() {
-        try {
-            const tokenPath = path.join(__dirname, '../../../tokens_keys/CaiYunXiaoYi.token');
-            return fs.readFileSync(tokenPath, 'utf8').trim();
-        } catch (error) {
-            console.error('无法读取彩云小译 Token:', error);
-            return null;
-        }
-    }
-    
     // 分割句子
     splitSentences(text) {
         // 替换换行符为空格
@@ -41,9 +32,9 @@ class Translator {
     // 调用彩云小译 API
     async translate(sentences) {
         if (!this.token) {
-            throw new Error('未配置彩云小译 Token');
+            throw new Error('请在设置中配置彩云小译 Token');
         }
-    
+        
         try {
             const response = await axios.post(
                 'http://api.interpreter.caiyunai.com/v1/translator',
