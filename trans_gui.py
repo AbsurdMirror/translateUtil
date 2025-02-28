@@ -43,6 +43,19 @@ print("欢迎使用 Translate Tool")
 ######################
 
 ###### 翻译功能 ######
+# 解析函数
+def parse_paragraphs(input_string):
+    paragraphs = []
+    pattern = r"\[(\d+):(\d+)\]\s*<([^>]+)>"
+    for line in input_string.strip().split("\n"):
+        match = re.search(pattern, line)
+        if match:
+            start, end, summary = match.groups()
+            # 转换为零索引形式
+            start = int(start) + 1
+            end = int(end) + 1
+            paragraphs.append([(start, end), summary])
+    return paragraphs
 
 def tranlateMain(source_content):
     no_newline_content, tranlate_source = split_string_by_english_sentences(source_content)
@@ -57,12 +70,14 @@ def tranlateMain(source_content):
     print(f"句子拆分: {tranlate_source_formatted} \n")
     print(f"翻译结果: {tranlate_target_formatted} \n")
 
+    paragraphs = None
     if hasSetting:
         if setting["useAI"]:
             numbered_lines = [f"{index}: {line}" for index, line in enumerate(tranlate_target)]
             numbered_lines = "\n".join(numbered_lines)
             resp_text = group_sentences_to_paragraphs(numbered_lines, setting["ai_model"])
             print(f"AI段落拆分: \n{resp_text} \n")
+            paragraphs = parse_paragraphs(resp_text)
 
     tranlate_source_target = []
     i = 0
@@ -77,7 +92,10 @@ def tranlateMain(source_content):
         else:
             tranlate_show = tranlate_target
 
-    transTextWindow.create_window_at_mouse_position(tranlate_show)
+    if paragraphs is None:
+        paragraphs = [[(1, len(tranlate_show)), "翻译结果"]]
+
+    transTextWindow.create_window_at_mouse_position(tranlate_show, paragraphs)
 
     if hasSetting :
         if setting["save"]["isSave"]:
@@ -125,7 +143,7 @@ def on_press(key):
         ctrl_c_press_times = 0
     
     if ctrl_x_press_times == 2:
-        copyTextWindow.create_window_at_mouse_position([])
+        copyTextWindow.create_window_at_mouse_position()
 
     if str(key) == ctrl_z_str:
         # 结束程序
@@ -169,13 +187,25 @@ class TextPositionWindow:
         self.window_text_box = None  
         self.window_side_text = None
 
-    def add_bullets_and_alternate_colors(self, string_list):  
-        self.window_text_box.config(font=("微软雅黑", 13))
-        self.window_text_box.delete('1.0', tk.END)  # 清除文本框内容  
+    def add_bullets_and_alternate_colors(self, string_list, summary, group_index):         
+        if group_index == 0:
+            self.group_ranges = {}
+            self.window_text_box.config(font=("微软雅黑", 13))
+            self.window_text_box.delete('1.0', tk.END)  # 清除文本框内容  
+            
+            self.window_side_text.config(font=("微软雅黑", 12))
+            self.window_side_text.delete('1.0', tk.END)  # 清除文本框内容  
+
+        # 插入段落总结，并设置标签
+        summary_tag = f"group{group_index}_summary"
+        self.window_text_box.insert(tk.END, summary + "\n\n", summary_tag)
+        self.window_text_box.tag_config(summary_tag, background="#F0F0AA", foreground="#333333", selectbackground="pink")
         
-        self.window_side_text.config(font=("微软雅黑", 12))
-        self.window_side_text.delete('1.0', tk.END)  # 清除文本框内容  
-        
+        # 绑定点击事件到段落总结
+        self.window_text_box.tag_bind(summary_tag, "<Button-1>", 
+                                    lambda event, idx=group_index: self.toggle_group_lines(idx))
+
+        start_index = self.window_text_box.index("end-1c").split(".")[0]  # 当前插入点的起始行号
         for i, string in enumerate(string_list):  
             # 添加小圆点  
             bullet_string = "• " + string  
@@ -187,8 +217,56 @@ class TextPositionWindow:
                 bg_color = "#E0EAF1"  # 奇数行背景色  
             
             # 插入带小圆点的字符串，并设置当前行的背景色  
-            self.window_text_box.insert(tk.END, bullet_string + "\n\n", f"line{i}")
-            self.window_text_box.tag_config(f"line{i}", background=bg_color, foreground="#333333", selectbackground="pink")
+            self.window_text_box.insert(tk.END, bullet_string + "\n\n", f"group{group_index}_line{i}")
+            self.window_text_box.tag_config(f"group{group_index}_line{i}", background=bg_color, foreground="#333333", selectbackground="pink")
+
+        end_index = self.window_text_box.index("end-1c").split(".")[0]  # 当前插入点的结束行号
+        self.group_ranges[group_index] = (int(start_index), int(end_index))  # 记录段落的行范围
+
+    def toggle_group_lines(self, group_index):
+        """
+        折叠或展开指定段落的内容。
+        """
+        if not hasattr(self, "group_ranges"):
+            self.group_ranges = {}  # 初始化段落范围记录字典
+        
+        # 获取段落的行范围
+        start_line, end_line = self.group_ranges.get(group_index, (None, None))
+        if start_line is None or end_line is None:
+            return  # 如果没有记录范围，则直接返回
+        
+        # 检查段落内容是否已隐藏
+        hidden = self.is_group_hidden(group_index)
+        
+        if hidden:
+            # 如果已隐藏，则重新显示内容
+            for line in range(start_line, end_line):
+                self.window_text_box.tag_configure(f"group{group_index}_line{line - start_line}", elide=False)
+        else:
+            # 如果未隐藏，则隐藏内容
+            for line in range(start_line, end_line):
+                self.window_text_box.tag_configure(f"group{group_index}_line{line - start_line}", elide=True)
+        
+        # 更新隐藏状态
+        self.set_group_hidden(group_index, not hidden)
+
+
+    def is_group_hidden(self, group_index):
+        """
+        检查指定段落的内容是否已被隐藏。
+        """
+        if not hasattr(self, "_hidden_groups"):
+            self._hidden_groups = {}  # 初始化隐藏状态字典
+        return self._hidden_groups.get(group_index, False)
+
+
+    def set_group_hidden(self, group_index, hidden):
+        """
+        设置指定段落的隐藏状态。
+        """
+        if not hasattr(self, "_hidden_groups"):
+            self._hidden_groups = {}  # 初始化隐藏状态字典
+        self._hidden_groups[group_index] = hidden
 
     def on_right_click(self,event):  
         # 获取self.window_text_box选中内容的单词  
@@ -269,17 +347,19 @@ class TextPositionWindow:
     def open_web(self):
         webbrowser.open(self.detail_web_url)
 
-    def update_window(self, string_list, x, y):
+    def update_window(self, string_list, paragraphs, x, y):
         # 更新窗口位置  
         self.window_root.geometry("+{}+{}".format(x, y))  
         
-        # 添加文本框内容  
-        self.add_bullets_and_alternate_colors(string_list)
+        # 添加新的段落
+        for i, ((start, end), summary) in enumerate(paragraphs):
+            paragraph_sentences = string_list[start - 1:end]
+            self.add_bullets_and_alternate_colors(paragraph_sentences, summary, i)
 
         # 确保窗口在最顶层  
         self.window_root.attributes('-topmost', True) 
     
-    def create_window(self, string_list, x, y):  
+    def create_window(self, string_list, paragraphs, x, y):  
         # 创建新的Tkinter窗口  
         self.window_root = tk.Tk()  
         self.window_root.title("Mouse Position Window")  
@@ -315,8 +395,10 @@ class TextPositionWindow:
         self.paned_window.add(self.right_frame)  
 
         # 添加内容  
-        self.add_bullets_and_alternate_colors(string_list)
-        
+        for i, ((start, end), summary) in enumerate(paragraphs):
+            paragraph_sentences = string_list[start - 1:end]
+            self.add_bullets_and_alternate_colors(paragraph_sentences, summary, i)
+
         # 确保窗口在最顶层  
         self.window_root.attributes('-topmost', True) 
         
@@ -326,18 +408,18 @@ class TextPositionWindow:
         # 显示窗口并进入事件循环  
         self.window_root.mainloop()  
     
-    def create_window_at_mouse_position(self, string_list):        
+    def create_window_at_mouse_position(self, string_list, paragraphs):        
         # 获取鼠标位置  
         x, y = pyautogui.position()  
         
         # 如果没有创建窗口或窗口线程已结束，则创建新窗口  
         if not self.window_created or not self.window_thread or not self.window_thread.is_alive():  
-            self.window_thread = threading.Thread(target=self.create_window, args=(string_list, x - 100, y - 100))  
+            self.window_thread = threading.Thread(target=self.create_window, args=(string_list, paragraphs, x - 100, y - 100))  
             self.window_thread.daemon = True  # 设置为守护线程  
             self.window_thread.start()  
             self.window_created = True  # 标记窗口已创建  
         else:  
-            self.update_window(string_list, x - 100, y - 100)  # 更新已有窗口  
+            self.update_window(string_list, paragraphs, x - 100, y - 100)  # 更新已有窗口  
 
 class CopyTextPositionWindow:
     window_created = False  
@@ -398,18 +480,18 @@ class CopyTextPositionWindow:
         # 显示窗口并进入事件循环  
         self.window_root.mainloop()  
     
-    def create_window_at_mouse_position(self, string_list):        
+    def create_window_at_mouse_position(self):        
         # 获取鼠标位置  
         x, y = pyautogui.position()  
         
         # 如果没有创建窗口或窗口线程已结束，则创建新窗口  
         if not self.window_created or not self.window_thread or not self.window_thread.is_alive():  
-            self.window_thread = threading.Thread(target=self.create_window, args=(string_list, x - 100, y - 100))  
+            self.window_thread = threading.Thread(target=self.create_window, args=([], x - 100, y - 100))  
             self.window_thread.daemon = True  # 设置为守护线程  
             self.window_thread.start()  
             self.window_created = True  # 标记窗口已创建  
         else:  
-            self.update_window(string_list, x - 100, y - 100)  # 更新已有窗口  
+            self.update_window([], x - 100, y - 100)  # 更新已有窗口  
 
 transTextWindow = TextPositionWindow()
 copyTextWindow = CopyTextPositionWindow()
