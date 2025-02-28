@@ -17,7 +17,8 @@
   },
   "dependencies": {
     "axios": "^1.8.1",
-    "natural": "^8.0.1"
+    "natural": "^8.0.1",
+    "openai": "^4.86.1"
   },
   "build": {
     "appId": "com.translator.app",
@@ -44,7 +45,9 @@
       {
         "from": "tokens_keys",
         "to": "tokens_keys",
-        "filter": ["*.token"]
+        "filter": [
+          "*.token"
+        ]
       }
     ]
   }
