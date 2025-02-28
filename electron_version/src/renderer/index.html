@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本翻译工具</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 标题栏 -->
+        <div class="title-bar">
+            <div class="title-bar-drag">文本翻译工具</div>
+            <div class="window-controls">
+                <button class="window-control" id="minimizeBtn">─</button>
+                <button class="window-control" id="maximizeBtn">□</button>
+                <button class="window-control close" id="closeBtn">×</button>
+            </div>
+        </div>
+
+        <!-- 主要内容区 -->
+        <div class="main-content">
+            <!-- 左侧面板：原文输入 -->
+            <div class="panel source-panel">
+                <div class="panel-header">
+                    <span>原文</span>
+                    <div class="panel-controls">
+                        <button id="pasteBtn">粘贴</button>
+                        <button id="clearSourceBtn">清空</button>
+                    </div>
+                </div>
+                <textarea id="sourceText" placeholder="在此输入或粘贴要翻译的文本"></textarea>
+            </div>
+
+            <!-- 右侧面板：译文显示 -->
+            <div class="panel target-panel">
+                <div class="panel-header">
+                    <span>译文</span>
+                    <div class="panel-controls">
+                        <button id="viewModeBtn">切换视图</button>
+                        <button id="copyBtn">复制</button>
+                        <button id="clearTargetBtn">清空</button>
+                    </div>
+                </div>
+                <div id="targetText" class="translation-result" data-view-mode="both">
+                    <!-- 翻译结果将在这里动态显示 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部工具栏 -->
+        <div class="toolbar">
+            <div class="translation-controls">
+                <button id="translateBtn" class="primary-btn">翻译</button>
+                <button id="settingsBtn" class="secondary-btn">设置</button>
+                <select id="targetLang">
+                    <option value="zh">中文</option>
+                    <option value="en">英文</option>
+                </select>
+            </div>
+            <div class="status-bar">
+                <span id="statusText">就绪</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置面板 -->
+    <div id="settingsPanel" class="settings-panel hidden">
+        <div class="settings-header">
+            <h3>设置</h3>
+            <button id="closeSettingsBtn">×</button>
+        </div>
+        <div class="settings-content">
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="useAI"> 启用 AI 分段
+                </label>
+            </div>
+            <div class="setting-item">
+                <label>AI 提供商：</label>
+                <select id="aiProvider">
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="zhipu">智谱</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label>AI API Key：</label>
+                <input type="password" id="aiKey" placeholder="请输入 API Key">
+            </div>
+            <div class="setting-item">
+                <label>快捷键设置</label>
+                <div class="shortcut-settings">
+                    <div>
+                        <span>翻译窗口：</span>
+                        <input type="text" id="translateShortcut" readonly value="Ctrl+O">
+                    </div>
+                    <div>
+                        <span>输入窗口：</span>
+                        <input type="text" id="inputShortcut" readonly value="Ctrl+X+X">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载渲染进程的主脚本 -->
+    <script src="index.js"></script>
+</body>
+</html>
